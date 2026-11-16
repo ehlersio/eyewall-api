@@ -58,6 +58,19 @@ export const OPENAPI_CONFIG = {
   ],
 };
 
+// Header holding a route's own Cache-Control on its edge-cached copy.
+export const ROUTE_CACHE_CONTROL = 'X-EyeWall-Cache-Control';
+
+// A cached response with the route's Cache-Control back in place, and the
+// internal header removed.
+export function restoreCacheControl(hit) {
+  const res = new Response(hit.body, hit);
+  const original = res.headers.get(ROUTE_CACHE_CONTROL);
+  if (original) res.headers.set('Cache-Control', original);
+  res.headers.delete(ROUTE_CACHE_CONTROL);
+  return res;
+}
+
 export function createApp() {
   const app = new OpenAPIHono({
     // A request that fails its schema (bad league, date, id) answers 400.
@@ -90,14 +103,23 @@ export function createApp() {
   // Edge cache: a hit never reaches the poller. Workers' Cache API only
   // exists on a custom domain, which is where this runs; elsewhere (tests,
   // workers.dev) the step is skipped.
+  //
+  // A cached copy comes back with the zone's Browser Cache TTL (4 hours)
+  // in place of a shorter max-age, so every hit told browsers to keep it 4
+  // hours. The route's own Cache-Control is stored next to the copy and put
+  // back on a hit.
   app.use('/v1/*', async (c, next) => {
     const cache = typeof caches !== 'undefined' ? caches.default : null;
     if (!cache || c.req.method !== 'GET') return next();
     const hit = await cache.match(c.req.raw);
-    if (hit) return new Response(hit.body, hit);
+    if (hit) return restoreCacheControl(hit);
     await next();
-    if (c.res.status === 200 && /max-age=[1-9]/.test(c.res.headers.get('Cache-Control') || '')) {
-      c.executionCtx.waitUntil(cache.put(c.req.raw, c.res.clone()));
+    const cacheControl = c.res.headers.get('Cache-Control') || '';
+    if (c.res.status === 200 && /max-age=[1-9]/.test(cacheControl)) {
+      const copy = c.res.clone();
+      const stored = new Response(copy.body, copy);
+      stored.headers.set(ROUTE_CACHE_CONTROL, cacheControl);
+      c.executionCtx.waitUntil(cache.put(c.req.raw, stored));
     }
   });
 

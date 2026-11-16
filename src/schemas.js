@@ -2,7 +2,7 @@
 
 import { z } from '@hono/zod-openapi';
 
-export const API_VERSION = '1.3.0';
+export const API_VERSION = '1.3.1';
 export const DOCS_URL = 'https://api.eyewallanalytics.com/docs';
 
 export const LICENSE_CC_BY = 'CC-BY-4.0';
