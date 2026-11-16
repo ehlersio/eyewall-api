@@ -16,12 +16,14 @@ import { registerScorecard } from './routes/scorecard.js';
 import { registerPowerRankings } from './routes/powerRankings.js';
 import { registerPercentiles } from './routes/percentiles.js';
 import { registerLineups } from './routes/lineups.js';
+import { registerNhlModels } from './routes/nhlModels.js';
+import { registerNhlText } from './routes/nhlText.js';
 
 const DESCRIPTION = `Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done.
 
 **What's here.** Only numbers EyeWall produces. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.
 
-**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit "${ATTRIBUTION}" wherever it appears. Each response's \`meta.license\` and \`meta.attribution\` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).
+**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit "${ATTRIBUTION}" wherever it appears. The exception is NHL models built on [MoneyPuck](https://moneypuck.com) inputs (WAR, NHL power rankings, team needs, trade fit, and EyeWall AI's NHL text): those are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), non-commercial only, crediting MoneyPuck.com as well. Each response's \`meta.license\` and \`meta.attribution\` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).
 
 **Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.
 
@@ -48,7 +50,8 @@ export const OPENAPI_CONFIG = {
     { name: 'Playoff odds', description: 'Season simulations.' },
     { name: 'Rankings', description: 'Power rankings, with EyeWall AI\'s paragraph per team.' },
     { name: 'Players', description: 'Per-player percentiles and shot-quality numbers.' },
-    { name: 'Lineups', description: 'Projected lines and starting goalies.' },
+    { name: 'Lineups', description: 'Projected lines, team needs and starting goalies.' },
+    { name: 'EyeWall AI', description: 'Recaps, previews and scouting reports written by EyeWall AI from EyeWall\'s data.' },
     { name: 'Model grades', description: 'How the models have done.' },
   ],
 };
@@ -101,6 +104,10 @@ export function createApp() {
   registerGames(app);
   registerPlayoffOdds(app);
   registerScorecard(app);
+  // NHL routes before the {league} ones: /v1/nhl/power-rankings must not
+  // match /v1/{league}/power-rankings (PWHL/AHL/ECHL only, a 400 for nhl).
+  registerNhlModels(app);
+  registerNhlText(app);
   registerPowerRankings(app);
   registerPercentiles(app);
   registerLineups(app);
