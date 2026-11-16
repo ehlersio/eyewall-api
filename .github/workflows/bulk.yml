@@ -1,0 +1,42 @@
+name: Bulk files
+
+# Nightly JSON + CSV of every league-wide table the API serves, uploaded
+# to the rolling `data` release (files replaced in place). The pipeline's
+# models run overnight (US Eastern); GitHub's cron can run hours late,
+# which is fine for a once-a-day snapshot.
+
+on:
+  schedule:
+    - cron: '30 12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bulk-files
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+
+      # No dependencies needed: the script only uses Node's fetch and fs.
+      - name: Export
+        run: node scripts/bulk-export.js bulk
+
+      - name: Publish to the data release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view data >/dev/null 2>&1; then
+            gh release create data --title "Bulk data (nightly)" --latest=false \
+              --notes "Nightly JSON and CSV of every league-wide table at api.eyewallanalytics.com. manifest.json lists each file's licence: CC BY 4.0, or CC BY-NC 4.0 for NHL models built on MoneyPuck inputs. Credit the attribution line given for each file. Docs: https://api.eyewallanalytics.com/docs"
+          fi
+          gh release upload data bulk/* --clobber
