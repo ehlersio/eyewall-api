@@ -2,6 +2,10 @@
 
 `/v1` changes are additive only. Breaking changes go to a new version.
 
+
+## 1.3.1 — 2026-11-16
+
+- Edge-cached responses keep their route's `Cache-Control` (contracts and the rest: 1 hour or less). Before, a cache hit carried the zone's 4-hour browser TTL.
 ## Bulk files: contracts — 2026-11-16
 
 - `nhl-contracts`, `nhl-contract-team-totals` and `nhl-contract-team-totals-signing-team` on the `data` release (JSON + CSV, CC0).
