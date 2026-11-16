@@ -13,8 +13,11 @@ import { registerElo } from './routes/elo.js';
 import { registerGames } from './routes/games.js';
 import { registerPlayoffOdds } from './routes/playoffOdds.js';
 import { registerScorecard } from './routes/scorecard.js';
+import { registerPowerRankings } from './routes/powerRankings.js';
+import { registerPercentiles } from './routes/percentiles.js';
+import { registerLineups } from './routes/lineups.js';
 
-const DESCRIPTION = `Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds and a public scorecard of how the models have done.
+const DESCRIPTION = `Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done.
 
 **What's here.** Only numbers EyeWall produces. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.
 
@@ -43,6 +46,9 @@ export const OPENAPI_CONFIG = {
     { name: 'Ratings', description: 'Team strength models.' },
     { name: 'Games', description: 'Per-game predictions.' },
     { name: 'Playoff odds', description: 'Season simulations.' },
+    { name: 'Rankings', description: 'Power rankings, with EyeWall AI\'s paragraph per team.' },
+    { name: 'Players', description: 'Per-player percentiles and shot-quality numbers.' },
+    { name: 'Lineups', description: 'Projected lines and starting goalies.' },
     { name: 'Model grades', description: 'How the models have done.' },
   ],
 };
@@ -95,6 +101,9 @@ export function createApp() {
   registerGames(app);
   registerPlayoffOdds(app);
   registerScorecard(app);
+  registerPowerRankings(app);
+  registerPercentiles(app);
+  registerLineups(app);
 
   app.doc31('/openapi.json', OPENAPI_CONFIG);
   app.get('/docs', Scalar({ url: '/openapi.json', pageTitle: 'EyeWall API' }));
