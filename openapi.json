@@ -1,0 +1,1557 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EyeWall API",
+    "version": "1.0.0",
+    "description": "Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds and a public scorecard of how the models have done.\n\n**What's here.** Only numbers EyeWall produces. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.\n\n**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit \"EyeWall Analytics (eyewallanalytics.com)\" wherever it appears. Each response's `meta.license` and `meta.attribution` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).\n\n**Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.\n\n**Stability.** `/v1` only changes by adding things. A breaking change gets a `/v2`, and `/v1` keeps working for at least a full season after.\n\nProbabilities are model estimates, not betting odds.",
+    "license": {
+      "name": "MIT (code); data CC BY 4.0",
+      "identifier": "MIT"
+    },
+    "contact": {
+      "name": "EyeWall Analytics",
+      "url": "https://eyewallanalytics.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.eyewallanalytics.com"
+    }
+  ],
+  "security": [],
+  "tags": [
+    {
+      "name": "Reference",
+      "description": "Leagues, seasons and teams, for joining to other data."
+    },
+    {
+      "name": "Ratings",
+      "description": "Team strength models."
+    },
+    {
+      "name": "Games",
+      "description": "Per-game predictions."
+    },
+    {
+      "name": "Playoff odds",
+      "description": "Season simulations."
+    },
+    {
+      "name": "Model grades",
+      "description": "How the models have done."
+    }
+  ],
+  "components": {
+    "schemas": {
+      "LeaguesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeagueInfo"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "LeagueInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/League"
+          },
+          "name": {
+            "type": "string"
+          },
+          "idSource": {
+            "type": "string",
+            "enum": [
+              "NHL",
+              "HockeyTech"
+            ],
+            "description": "Where the league's team, game and player ids come from."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "idSource"
+        ]
+      },
+      "League": {
+        "type": "string",
+        "enum": [
+          "nhl",
+          "pwhl",
+          "ahl",
+          "echl"
+        ],
+        "description": "League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.",
+        "example": "nhl"
+      },
+      "Meta": {
+        "type": "object",
+        "properties": {
+          "league": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/League"
+              },
+              {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "description": "Which EyeWall model or table the data comes from."
+          },
+          "license": {
+            "type": "string",
+            "example": "CC-BY-4.0"
+          },
+          "attribution": {
+            "type": "string",
+            "description": "Credit line to show wherever the data appears.",
+            "example": "EyeWall Analytics (eyewallanalytics.com)"
+          },
+          "generatedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "When EyeWall produced this data (ISO 8601 date or timestamp), null when unknown."
+          },
+          "docs": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "league",
+          "source",
+          "license",
+          "attribution",
+          "generatedAt",
+          "docs"
+        ]
+      },
+      "Problem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "about:blank"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status"
+        ],
+        "description": "RFC 9457 problem details."
+      },
+      "SeasonsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Seasons"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "Seasons": {
+        "type": "object",
+        "properties": {
+          "current": {
+            "$ref": "#/components/schemas/CurrentSeason"
+          },
+          "next": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CurrentSeason"
+              },
+              {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "PWHL only: the next regular season once it is scheduled. Null otherwise."
+              }
+            ]
+          },
+          "seasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Season"
+            },
+            "description": "Seasons EyeWall has team data for, newest first."
+          }
+        },
+        "required": [
+          "current",
+          "next",
+          "seasons"
+        ]
+      },
+      "CurrentSeason": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SeasonType"
+          },
+          "startDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "description": "The season EyeWall treats as current. For the PWHL this is the latest regular season until the next one starts."
+      },
+      "SeasonType": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "regular",
+          "playoffs",
+          "preseason",
+          "allstar",
+          null
+        ],
+        "description": "HockeyTech season type. Null for the NHL, whose season id covers preseason, regular season and playoffs (game type is per game)."
+      },
+      "Season": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 20262027
+          },
+          "label": {
+            "type": "string",
+            "example": "2026-27"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SeasonType"
+          },
+          "startYear": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type",
+          "startYear"
+        ]
+      },
+      "TeamsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamRef"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "TeamRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "League team id (NHL team id, or HockeyTech team id).",
+            "example": 12
+          },
+          "code": {
+            "type": "string",
+            "example": "CAR"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "Carolina Hurricanes"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name"
+        ]
+      },
+      "EloResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Elo"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "Elo": {
+        "type": "object",
+        "properties": {
+          "homeAdvantage": {
+            "type": "number",
+            "description": "Elo points added to the home team.",
+            "example": 35
+          },
+          "formula": {
+            "type": "string",
+            "example": "P(home win) = 1 / (1 + 10^((awayRating - (homeRating + homeAdvantage)) / 400)); no home advantage at a neutral site"
+          },
+          "ratings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EloRating"
+            },
+            "description": "Current teams with a rating, highest first. A team with no games in EyeWall's replay yet (e.g. an expansion team before its first game) is left out."
+          }
+        },
+        "required": [
+          "homeAdvantage",
+          "formula",
+          "ratings"
+        ]
+      },
+      "EloRating": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamRef"
+          },
+          "rating": {
+            "type": "number",
+            "example": 1577.5
+          }
+        },
+        "required": [
+          "team",
+          "rating"
+        ]
+      },
+      "GamesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GamesForDate"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "GamesForDate": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16"
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameWinProbability"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "games"
+        ]
+      },
+      "GameWinProbability": {
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "example": 2026020331
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16"
+          },
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "gameType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "regular",
+              "playoffs",
+              null
+            ],
+            "description": "NHL only; null for PWHL/AHL/ECHL (see the season's type)."
+          },
+          "homeTeam": {
+            "$ref": "#/components/schemas/GameTeam"
+          },
+          "awayTeam": {
+            "$ref": "#/components/schemas/GameTeam"
+          },
+          "neutralSite": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "NHL only; null for PWHL/AHL/ECHL."
+          },
+          "homeRating": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "awayRating": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "homeWinProbability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "example": 0.4517
+          },
+          "awayWinProbability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "example": 0.5483
+          },
+          "loggedOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16",
+            "description": "The morning (America/New_York) the probability was logged. The last pre-game log is kept, and is what EyeWall's public scorecard grades."
+          }
+        },
+        "required": [
+          "gameId",
+          "date",
+          "season",
+          "gameType",
+          "homeTeam",
+          "awayTeam",
+          "neutralSite",
+          "homeRating",
+          "awayRating",
+          "homeWinProbability",
+          "awayWinProbability",
+          "loggedOn"
+        ]
+      },
+      "GameTeam": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name"
+        ],
+        "description": "A team in a game. Fields are null only for a team that is no longer current (e.g. relocated)."
+      },
+      "GameWinProbabilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GameWinProbability"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "PlayoffOddsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PlayoffOdds"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "PlayoffOdds": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "runDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16",
+            "description": "The nightly run these numbers come from."
+          },
+          "stale": {
+            "type": "boolean",
+            "description": "True when the latest run is older than expected (the nightly job missed a run)."
+          },
+          "simulations": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "PWHL/AHL/ECHL: the playoff format the simulation used, or \"unverified\"."
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamPlayoffOdds"
+            },
+            "description": "Highest playoff probability first."
+          }
+        },
+        "required": [
+          "season",
+          "runDate",
+          "stale",
+          "simulations",
+          "format",
+          "note",
+          "teams"
+        ]
+      },
+      "TeamPlayoffOdds": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamRef"
+          },
+          "playoffProbability": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Share of simulations in which the team makes the playoffs. Null when the league hasn't published this season's playoff format."
+          },
+          "divisionProbability": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Share of simulations in which the team wins its division. Null where the format has no division title."
+          },
+          "projectedPoints": {
+            "type": "object",
+            "properties": {
+              "mean": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "NHL only."
+              },
+              "p10": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "p50": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "PWHL/AHL/ECHL only."
+              },
+              "p90": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "mean",
+              "p10",
+              "p50",
+              "p90"
+            ],
+            "description": "Final standings points across the simulations."
+          },
+          "currentPoints": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "gamesPlayed": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "gamesRemaining": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "eloRating": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "NHL only: the rating the simulation started from."
+          }
+        },
+        "required": [
+          "team",
+          "playoffProbability",
+          "divisionProbability",
+          "projectedPoints",
+          "currentPoints",
+          "gamesPlayed",
+          "gamesRemaining",
+          "eloRating"
+        ]
+      },
+      "ScorecardResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Scorecard"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "Scorecard": {
+        "type": "object",
+        "properties": {
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "models": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "live": {
+                  "$ref": "#/components/schemas/ModelGrade"
+                },
+                "backtest": {
+                  "$ref": "#/components/schemas/ModelGrade"
+                }
+              },
+              "required": [
+                "live",
+                "backtest"
+              ]
+            },
+            "description": "Keyed by model: gameWinner, startingGoalie, playoffOdds."
+          }
+        },
+        "required": [
+          "updatedAt",
+          "models"
+        ]
+      },
+      "ModelGrade": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "model": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "live",
+              "backtest"
+            ]
+          },
+          "period": {
+            "type": "string",
+            "example": "2026-27"
+          },
+          "status": {
+            "type": "string",
+            "description": "\"ok\", or \"pending\" before there is anything to grade."
+          },
+          "n": {
+            "type": "integer",
+            "description": "Predictions graded."
+          },
+          "accuracy": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "brier": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "logLoss": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "baseline": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "brier": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "accuracy": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "brier",
+              "accuracy"
+            ],
+            "description": "A naive rule to beat, scored on the same predictions."
+          },
+          "calibration": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "bucket": {
+                  "type": "integer"
+                },
+                "predicted": {
+                  "type": "number"
+                },
+                "actual": {
+                  "type": "number"
+                },
+                "n": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "bucket",
+                "predicted",
+                "actual",
+                "n"
+              ]
+            }
+          },
+          "recent": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "The latest graded predictions (live grades only)."
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "model",
+          "kind",
+          "period",
+          "status",
+          "n",
+          "accuracy",
+          "brier",
+          "logLoss",
+          "baseline",
+          "calibration",
+          "recent",
+          "note",
+          "updatedAt"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/v1/leagues": {
+      "get": {
+        "operationId": "listLeagues",
+        "tags": [
+          "Reference"
+        ],
+        "summary": "Leagues covered",
+        "responses": {
+          "200": {
+            "description": "Leagues",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaguesResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/seasons": {
+      "get": {
+        "operationId": "getSeasons",
+        "tags": [
+          "Reference"
+        ],
+        "summary": "Current season and seasons with data",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/League"
+            },
+            "required": true,
+            "description": "League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.",
+            "name": "league",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Seasons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeasonsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/teams": {
+      "get": {
+        "operationId": "listTeams",
+        "tags": [
+          "Reference"
+        ],
+        "summary": "Current teams",
+        "description": "Team ids, codes and names, for joining EyeWall data to the league's own feeds.",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/League"
+            },
+            "required": true,
+            "description": "League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.",
+            "name": "league",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Teams",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/elo": {
+      "get": {
+        "operationId": "getElo",
+        "tags": [
+          "Ratings"
+        ],
+        "summary": "Elo team ratings",
+        "description": "EyeWall's Elo ratings, recomputed nightly from scratch: every NHL regular-season game, or every PWHL/AHL/ECHL regular-season and playoff game since 2023-24, with teams regressed toward the mean between seasons. Win probabilities on `/games` use these ratings and the formula given here.",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/League"
+            },
+            "required": true,
+            "description": "League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.",
+            "name": "league",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ratings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EloResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/games": {
+      "get": {
+        "operationId": "listGames",
+        "tags": [
+          "Games"
+        ],
+        "summary": "Win probabilities for a day's games",
+        "description": "Pre-game Elo win probabilities, logged each morning for that day's and the next day's games. NHL preseason and all-star games are not predicted. Probabilities are model estimates, not odds.",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/League"
+            },
+            "required": true,
+            "description": "League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.",
+            "name": "league",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-11-16",
+              "description": "Game date (league local schedule date). Defaults to today in America/New_York."
+            },
+            "required": false,
+            "description": "Game date (league local schedule date). Defaults to today in America/New_York.",
+            "name": "date",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Games",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GamesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/games/{gameId}/win-probability": {
+      "get": {
+        "operationId": "getGameWinProbability",
+        "tags": [
+          "Games"
+        ],
+        "summary": "Win probability for one game",
+        "description": "Pre-game Elo win probabilities, logged each morning for that day's and the next day's games. NHL preseason and all-star games are not predicted. Probabilities are model estimates, not odds.",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/League"
+            },
+            "required": true,
+            "description": "League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.",
+            "name": "league",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "2026020331"
+            },
+            "required": true,
+            "name": "gameId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Game",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameWinProbabilityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/playoff-odds": {
+      "get": {
+        "operationId": "getPlayoffOdds",
+        "tags": [
+          "Playoff odds"
+        ],
+        "summary": "Playoff probabilities for every team",
+        "description": "A nightly Monte Carlo simulation of the rest of the regular season from EyeWall's Elo ratings. Probabilities are model estimates, not odds.",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/League"
+            },
+            "required": true,
+            "description": "League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.",
+            "name": "league",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,8}$",
+              "description": "Season id (see /seasons). Defaults to the latest run.",
+              "example": "20262027"
+            },
+            "required": false,
+            "description": "Season id (see /seasons). Defaults to the latest run.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Playoff odds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayoffOddsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/scorecard": {
+      "get": {
+        "operationId": "getNhlScorecard",
+        "tags": [
+          "Model grades"
+        ],
+        "summary": "How EyeWall's NHL models have done",
+        "description": "Each model graded against results: this season's live predictions (logged before puck drop) and a backtest over past seasons, with accuracy, Brier score, log loss, a naive baseline and calibration buckets.",
+        "responses": {
+          "200": {
+            "description": "Scorecard",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScorecardResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

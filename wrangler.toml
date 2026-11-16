@@ -1,0 +1,33 @@
+name = "eyewall-api"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+account_id = "178d2c4244e085446f83db4137cf8ff7"
+
+# Served at api.eyewallanalytics.com. The zone is on Cloudflare, so a Custom
+# Domain creates the DNS record and certificate on deploy.
+routes = [
+  { pattern = "api.eyewallanalytics.com", custom_domain = true },
+]
+workers_dev = false
+
+[observability]
+enabled = true
+
+# Every number this API serves comes from eyewall-poller, called over a
+# Service Binding (no public hop). The poller keeps all model and table
+# logic; this Worker only validates, reshapes into the /v1 schemas,
+# documents and caches.
+[[services]]
+binding = "POLLER"
+service = "eyewall-poller"
+
+# Per-IP limit on /v1/*. 60 a minute is far above what one integration
+# needs (the data changes a few times a day); the nightly bulk files are
+# the route for whole-table downloads. Same provisioning as the poller's
+# limiters: created at deploy, namespace_id is just a scope number.
+[[ratelimits]]
+name         = "API_LIMITER"
+namespace_id = "1003"
+simple       = { limit = 60, period = 60 }

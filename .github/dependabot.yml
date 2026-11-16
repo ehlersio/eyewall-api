@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      wrangler:
+        patterns:
+          - "wrangler"
+      eslint:
+        patterns:
+          - "@eslint/*"
+          - "eslint*"
+      hono:
+        patterns:
+          - "hono"
+          - "@hono/*"
+          - "zod"
+  # Workflow actions are pinned to commit SHAs; this keeps the pins, and
+  # their version comments, moving.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"

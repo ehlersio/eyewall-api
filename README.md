@@ -1,0 +1,85 @@
+# EyeWall API
+
+A public, versioned API for the hockey models built by [EyeWall Analytics](https://eyewallanalytics.com): Elo ratings, pre-game win probabilities, playoff odds and a scorecard of how the models have done, for the **NHL, PWHL, AHL and ECHL**.
+
+- **Base URL:** `https://api.eyewallanalytics.com`
+- **Docs:** [api.eyewallanalytics.com/docs](https://api.eyewallanalytics.com/docs)
+- **OpenAPI 3.1:** [api.eyewallanalytics.com/openapi.json](https://api.eyewallanalytics.com/openapi.json) (also [`openapi.json`](openapi.json) in this repo)
+
+No key needed. 60 requests a minute per IP.
+
+```bash
+curl https://api.eyewallanalytics.com/v1/nhl/playoff-odds
+```
+
+## Routes (v1)
+
+| Route | What it returns |
+|---|---|
+| `GET /v1/leagues` | The four leagues and where their ids come from |
+| `GET /v1/{league}/seasons` | Current season, the next PWHL season, and seasons with data |
+| `GET /v1/{league}/teams` | Current team ids, codes and names, for joining to league feeds |
+| `GET /v1/{league}/elo` | Elo ratings, home advantage and the win-probability formula |
+| `GET /v1/{league}/games?date=YYYY-MM-DD` | Pre-game win probabilities for a day's games (default: today, America/New_York) |
+| `GET /v1/{league}/games/{gameId}/win-probability` | One game's pre-game win probability |
+| `GET /v1/{league}/playoff-odds[?season=]` | Every team's playoff and division probability and projected points, from the nightly simulation |
+| `GET /v1/nhl/scorecard` | Live and backtest grades for the game-winner, starting-goalie and playoff-odds models |
+
+`{league}` is `nhl`, `pwhl`, `ahl` or `echl`. NHL ids are the NHL's; PWHL, AHL and ECHL ids are HockeyTech's.
+
+Every success is `{ data, meta }`. `meta` carries the league, the model the data comes from, when EyeWall produced it, the licence and the credit line. Errors are [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) `application/problem+json`. Missing values are `null`, never a placeholder.
+
+Probabilities are model estimates, not betting odds.
+
+## What's not here
+
+Box scores, play-by-play, shot locations, rosters, standings and schedules belong to the leagues (NHL, HockeyTech). This API serves only what EyeWall computes, plus the ids and team codes you need to join it to those feeds. NHL contracts are a separate open dataset: [ehlersio/nhl-contracts](https://github.com/ehlersio/nhl-contracts) (CC0).
+
+## Licence
+
+- **Data:** [CC BY 4.0](LICENSE-DATA). Credit **"EyeWall Analytics (eyewallanalytics.com)"** wherever the data appears. Each response's `meta.license` and `meta.attribution` say exactly what applies to it.
+- **Code:** [MIT](LICENSE).
+
+Later routes that use MoneyPuck inputs (WAR and the models built on it) will be CC BY-NC 4.0 with a MoneyPuck credit, and will say so in `meta`.
+
+## Stability
+
+`/v1` only changes by adding things. CI runs [oasdiff](https://github.com/oasdiff/oasdiff) on every PR and fails one that would break an existing caller. A breaking change gets `/v2`, and `/v1` keeps working, with `Deprecation` and `Sunset` headers, for at least a full season. See [CHANGELOG.md](CHANGELOG.md).
+
+## How it works
+
+A Cloudflare Worker ([Hono](https://hono.dev) + [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi)). Each route declares its parameters and response with Zod schemas, and the OpenAPI document is generated from them, so the spec can't drift from the code.
+
+The data comes from [eyewall-poller](https://github.com/ehlersio/eyewall-poller), EyeWall's app backend, over a Cloudflare Service Binding. The poller keeps every model and table read; this Worker validates, reshapes into the `/v1` schemas, documents and caches (edge cache plus `Cache-Control`). Poller routes it uses: `/config/teams`, `/config/seasons*`, `/elo/ratings`, `/win-probs`, `/playoff-odds/league`, `/scorecard`.
+
+```
+src/
+├── index.js          # Worker entry
+├── app.js            # Middleware (CORS, rate limit, edge cache, errors), OpenAPI config, /docs
+├── schemas.js        # Envelope, Meta, Problem, League, TeamRef
+├── poller.js         # Service Binding client
+├── teams.js          # Team lookup (NHL by code, HockeyTech by id)
+├── respond.js        # { data, meta } and problem responses
+└── routes/           # reference, elo, games, playoffOdds, scorecard
+scripts/write-openapi.js  # Writes openapi.json (npm run spec)
+test/                     # Route tests against fixture poller responses
+```
+
+## Development
+
+```bash
+npm ci
+npm test              # route tests (Vitest, plain Node)
+npm run lint
+npm run spec          # regenerate openapi.json after changing a route; commit it
+npm run spec:check    # CI: fails when openapi.json is out of date
+npm run lint:spec     # Redocly lint
+```
+
+`npm run dev` runs the Worker locally; the `POLLER` binding then needs the poller running locally too (`wrangler dev` in eyewall-poller).
+
+Deploys run from `.github/workflows/deploy.yml` on push to `main` (repo secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`), or by hand with `npm run deploy`.
+
+## Disclaimer
+
+Not affiliated with or endorsed by the NHL, PWHL, AHL, ECHL or HockeyTech.
