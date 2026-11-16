@@ -2,6 +2,10 @@
 
 `/v1` changes are additive only. Breaking changes go to a new version.
 
+## Bulk files: contracts — 2026-11-16
+
+- `nhl-contracts`, `nhl-contract-team-totals` and `nhl-contract-team-totals-signing-team` on the `data` release (JSON + CSV, CC0).
+
 ## 1.3.0 — 2026-11-16
 
 Added (NHL, CC0 from the nhl-contracts dataset):

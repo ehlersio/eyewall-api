@@ -56,7 +56,7 @@ Probabilities are model estimates, not betting odds.
 
 ## Bulk files
 
-Every league-wide table (teams, Elo, playoff odds, power rankings, NHL RAPM and WAR) is exported nightly as JSON and CSV to the [`data` release](https://github.com/ehlersio/eyewall-api/releases/tag/data). Files are replaced in place, so a link such as `releases/download/data/nhl-elo.csv` always points to the latest export. `manifest.json` lists each file's licence, attribution and when the data was produced. Use these files for whole tables instead of calling the API in a loop. The export is `scripts/bulk-export.js`, run by `.github/workflows/bulk.yml`.
+Every league-wide table (teams, Elo, playoff odds, power rankings, NHL RAPM and WAR, NHL contracts and team cap totals) is exported nightly as JSON and CSV to the [`data` release](https://github.com/ehlersio/eyewall-api/releases/tag/data). Files are replaced in place, so a link such as `releases/download/data/nhl-elo.csv` always points to the latest export. `manifest.json` lists each file's licence, attribution and when the data was produced. Use these files for whole tables instead of calling the API in a loop. The export is `scripts/bulk-export.js`, run by `.github/workflows/bulk.yml`.
 
 ## What's not here
 

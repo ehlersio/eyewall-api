@@ -27,6 +27,6 @@ describe('bulk export', () => {
   it('covers every league-wide table, each with a unique file name', () => {
     const names = DATASETS.map(d => d[0]);
     expect(new Set(names).size).toBe(names.length);
-    expect(names).toEqual(expect.arrayContaining(['nhl-elo', 'ahl-playoff-odds', 'echl-power-rankings', 'nhl-war', 'nhl-rapm']));
+    expect(names).toEqual(expect.arrayContaining(['nhl-elo', 'ahl-playoff-odds', 'echl-power-rankings', 'nhl-war', 'nhl-rapm', 'nhl-contracts', 'nhl-contract-team-totals', 'nhl-contract-team-totals-signing-team']));
   });
 });

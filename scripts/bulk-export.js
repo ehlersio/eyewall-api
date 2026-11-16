@@ -29,6 +29,10 @@ export const DATASETS = [
   ['nhl-power-rankings', '/v1/nhl/power-rankings', d => d.teams],
   ['nhl-rapm', '/v1/nhl/rapm', d => d.players],
   ['nhl-war', '/v1/nhl/war', d => d.players],
+  // CC0, from the nhl-contracts dataset (whose own release has every row and source claim)
+  ['nhl-contracts', '/v1/nhl/contracts', d => d.players],
+  ['nhl-contract-team-totals', '/v1/nhl/contracts/teams', d => d.teams],
+  ['nhl-contract-team-totals-signing-team', '/v1/nhl/contracts/teams?basis=signing_team', d => d.teams],
 ];
 
 // Nested objects become dotted columns (team.code); arrays stay JSON.
@@ -85,7 +89,7 @@ async function main() {
     exportedAt: new Date().toISOString(),
     api: API,
     docs: `${API}/docs`,
-    note: 'Each file pair (.json, .csv) carries its own licence: CC-BY-4.0, or CC-BY-NC-4.0 for NHL models built on MoneyPuck inputs. Credit the attribution line given for each.',
+    note: 'Each file pair (.json, .csv) carries its own licence: CC-BY-4.0, CC-BY-NC-4.0 for NHL models built on MoneyPuck inputs, or CC0-1.0 for NHL contracts (from github.com/ehlersio/nhl-contracts). Credit the attribution line given for each.',
     files,
     failures,
   };
