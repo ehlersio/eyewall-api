@@ -2,10 +2,10 @@
   "openapi": "3.1.0",
   "info": {
     "title": "EyeWall API",
-    "version": "1.2.1",
-    "description": "Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done.\n\n**What's here.** Only numbers EyeWall produces. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.\n\n**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit \"EyeWall Analytics (eyewallanalytics.com)\" wherever it appears. The exception is NHL models built on [MoneyPuck](https://moneypuck.com) inputs (WAR, NHL power rankings, team needs, trade fit, and EyeWall AI's NHL text): those are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), non-commercial only, crediting MoneyPuck.com as well. Each response's `meta.license` and `meta.attribution` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).\n\n**Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.\n\n**Stability.** `/v1` only changes by adding things. A breaking change gets a `/v2`, and `/v1` keeps working for at least a full season after.\n\nProbabilities are model estimates, not betting odds.",
+    "version": "1.3.0",
+    "description": "Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done; and NHL contracts from EyeWall's open [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset.\n\n**What's here.** Only numbers EyeWall produces, and the contracts dataset EyeWall collects. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.\n\n**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit \"EyeWall Analytics (eyewallanalytics.com)\" wherever it appears. The exception is NHL models built on [MoneyPuck](https://moneypuck.com) inputs (WAR, NHL power rankings, team needs, trade fit, and EyeWall AI's NHL text): those are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), non-commercial only, crediting MoneyPuck.com as well. NHL contracts are [CC0](https://creativecommons.org/publicdomain/zero/1.0/) (no credit required), like the dataset they come from. Each response's `meta.license` and `meta.attribution` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).\n\n**Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.\n\n**Stability.** `/v1` only changes by adding things. A breaking change gets a `/v2`, and `/v1` keeps working for at least a full season after.\n\nProbabilities are model estimates, not betting odds.",
     "license": {
-      "name": "MIT (code); data CC BY 4.0",
+      "name": "MIT (code); data CC BY 4.0, CC BY-NC 4.0 or CC0 per route",
       "identifier": "MIT"
     },
     "contact": {
@@ -51,6 +51,10 @@
     {
       "name": "EyeWall AI",
       "description": "Recaps, previews and scouting reports written by EyeWall AI from EyeWall's data."
+    },
+    {
+      "name": "Contracts",
+      "description": "NHL contracts from EyeWall's open [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset: **CC0**, no credit required. Every number is tied to the public document it came from; `tier` says what kind of document (A club release on NHL.com, B NHL.com staff story, C ESPN's transaction wire, D PuckPedia's public posts or insiders quoted on r/hockey, E CapFriendly as archived by the Internet Archive). Where sources disagree the field is null and named in `conflicts`, never resolved. The per-source claims, with the sentence each number came from, are in the dataset's release files. Refreshed nightly."
     },
     {
       "name": "Model grades",
@@ -1788,6 +1792,1310 @@
           "locale",
           "text",
           "generatedAt"
+        ]
+      },
+      "PlayerContractsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PlayerContracts"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "PlayerContracts": {
+        "type": "object",
+        "properties": {
+          "player": {
+            "$ref": "#/components/schemas/ContractPlayer"
+          },
+          "season": {
+            "type": "integer",
+            "description": "NHL season id.",
+            "example": 20262027
+          },
+          "current": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Contract"
+              },
+              {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "clauseStatus": {
+                    "$ref": "#/components/schemas/ClauseStatus"
+                  }
+                },
+                "required": [
+                  "clauseStatus"
+                ]
+              }
+            ],
+            "description": "The contract covering `season`, or null."
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Contract"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "seasons": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ContractSeason"
+                      }
+                    }
+                  },
+                  "required": [
+                    "seasons"
+                  ]
+                }
+              ]
+            },
+            "description": "Every contract the dataset has for the player, newest first."
+          }
+        },
+        "required": [
+          "player",
+          "season",
+          "current",
+          "history"
+        ]
+      },
+      "ContractPlayer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "NHL player id; null when no source gave or matched one.",
+            "example": 8478427
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "Sebastian Aho"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "ContractSourceTier": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          null
+        ],
+        "description": "A club release on NHL.com, B NHL.com staff story, C ESPN transaction wire, D PuckPedia's public posts or insiders quoted on r/hockey, E archived CapFriendly page."
+      },
+      "ContractClause": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "\"NMC\" (no-move), \"NTC\" (no-trade) or \"M-NTC\" (modified no-trade).",
+            "example": "NMC"
+          },
+          "fromSeason": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "NHL season id.",
+            "example": 20262027
+          },
+          "toSeason": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "NHL season id.",
+            "example": 20262027
+          },
+          "listSize": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "For a modified clause: the number of teams on the list, when stated."
+          },
+          "listType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "\"no-trade\" (teams he cannot be traded to) or \"approved\", when stated."
+          },
+          "tier": {
+            "$ref": "#/components/schemas/ContractSourceTier"
+          }
+        },
+        "required": [
+          "kind",
+          "fromSeason",
+          "toSeason",
+          "listSize",
+          "listType",
+          "tier"
+        ]
+      },
+      "ClauseStatus": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "clause",
+              "none",
+              "none_likely",
+              "unknown"
+            ],
+            "description": "\"clause\": a no-move or no-trade clause applies; \"none\": a source says there is none; \"none_likely\": none reported where one would be; \"unknown\"."
+          },
+          "basis": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "What the status rests on: \"source\", \"stated\", \"capfriendly_2024\", \"ineligible\" or \"breakdown_without_clause\"."
+          }
+        },
+        "required": [
+          "status",
+          "basis"
+        ]
+      },
+      "Contract": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The dataset's contract_key: NHL player id (or normalized name) | signing team | signing month. Null on /v1/nhl/contracts for a roster player the dataset has no contract for.",
+            "example": "8478427|CAR|2023-07"
+          },
+          "player": {
+            "$ref": "#/components/schemas/ContractPlayer"
+          },
+          "signingTeam": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Code of the team that signed the contract, as it was then (ARI for the Coyotes). A player traded since keeps it.",
+            "example": "CAR"
+          },
+          "signedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Signing date when a source states it, else the date the deal was first published.",
+            "example": "2023-07-26"
+          },
+          "contractType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "\"ELC\", \"standard\", \"extension\" or \"PTO\"."
+          },
+          "termYears": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "startSeason": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "NHL season id.",
+            "example": 20262027
+          },
+          "endSeason": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Last season of the contract (for a bought-out deal, the last season before the buyout).",
+            "example": 20262027
+          },
+          "yearsLeft": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Seasons left after the requested one (history: after the current season)."
+          },
+          "capHit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Cap hit in USD for the requested season (history: the contract's stated cap hit or AAV). Null when no source states one."
+          },
+          "capHitBasis": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "season",
+              "contract",
+              "aav",
+              null
+            ],
+            "description": "Where capHit comes from: the season breakdown, the contract's stated cap hit, or its AAV."
+          },
+          "capHitTier": {
+            "$ref": "#/components/schemas/ContractSourceTier"
+          },
+          "aav": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Stated average annual value, USD."
+          },
+          "totalValue": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Stated total value, USD."
+          },
+          "oneWay": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "True one-way, false two-way, null not stated."
+          },
+          "expiryType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "\"UFA\" or \"RFA\" at expiry."
+          },
+          "expiryTypeDerived": {
+            "type": "boolean",
+            "description": "True when expiryType was worked out from age and service rules rather than stated by a source."
+          },
+          "current": {
+            "type": "boolean",
+            "description": "The dataset marks the contract as running now."
+          },
+          "boughtOut": {
+            "type": "boolean"
+          },
+          "endSeasonSigned": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "For a bought-out contract: the season it was signed to run through.",
+            "example": 20262027
+          },
+          "tier": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractSourceTier"
+              },
+              {
+                "description": "Best source tier behind the contract."
+              }
+            ]
+          },
+          "official": {
+            "type": "boolean",
+            "description": "True when the best source is tier A-C (club, NHL.com or ESPN)."
+          },
+          "sources": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Number of source documents."
+          },
+          "conflicts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Fields the sources disagree on (left null rather than picked), e.g. [\"aav_usd\"]."
+          },
+          "clauses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractClause"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "player",
+          "signingTeam",
+          "signedAt",
+          "contractType",
+          "termYears",
+          "startSeason",
+          "endSeason",
+          "yearsLeft",
+          "capHit",
+          "capHitBasis",
+          "capHitTier",
+          "aav",
+          "totalValue",
+          "oneWay",
+          "expiryType",
+          "expiryTypeDerived",
+          "current",
+          "boughtOut",
+          "endSeasonSigned",
+          "tier",
+          "official",
+          "sources",
+          "conflicts",
+          "clauses"
+        ]
+      },
+      "ContractSeason": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": "integer",
+            "description": "NHL season id.",
+            "example": 20262027
+          },
+          "capHit": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "aav": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "baseSalary": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "signingBonus": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "performanceBonus": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "totalSalary": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "minorsSalary": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "AHL salary of a two-way season."
+          },
+          "oneWay": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "clause": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Clause label for the season as the source writes it."
+          },
+          "clauseStatus": {
+            "$ref": "#/components/schemas/ClauseStatus"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/ContractSourceTier"
+          }
+        },
+        "required": [
+          "season",
+          "capHit",
+          "aav",
+          "baseSalary",
+          "signingBonus",
+          "performanceBonus",
+          "totalSalary",
+          "minorsSalary",
+          "oneWay",
+          "clause",
+          "clauseStatus",
+          "tier"
+        ]
+      },
+      "TeamContractsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TeamContracts"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "TeamContracts": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamRef"
+          },
+          "season": {
+            "type": "integer",
+            "description": "NHL season id.",
+            "example": 20262027
+          },
+          "rosterKnown": {
+            "type": "boolean",
+            "description": "False when the NHL roster could not be read: then only deals the team signed are listed."
+          },
+          "contracts": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Contract"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "onRoster": {
+                      "type": "boolean",
+                      "description": "On the team's current NHL roster. False: a deal the team signed whose player is elsewhere now."
+                    },
+                    "alternates": {
+                      "type": "integer",
+                      "description": "Other rows the dataset holds for the same deal (an id-keyed and an archived name-keyed row, say); this one was chosen by tier and source count."
+                    }
+                  },
+                  "required": [
+                    "position",
+                    "onRoster",
+                    "alternates"
+                  ]
+                }
+              ]
+            },
+            "description": "One contract per player: everyone on the current roster, then deals the team signed whose player is elsewhere (`onRoster` false). Cap hit descending."
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "player": {
+                  "$ref": "#/components/schemas/ContractPlayer"
+                },
+                "position": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "gap": {
+                  "type": "string",
+                  "description": "\"no_contract\", \"no_money\" or \"no_structure\"."
+                },
+                "status": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Why: older rows only, mentioned but not parsed, or absent from every source."
+                }
+              },
+              "required": [
+                "player",
+                "position",
+                "gap",
+                "status"
+              ]
+            },
+            "description": "Roster players the dataset has no contract figure for."
+          },
+          "deadCap": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/DeadCapCharge"
+            },
+            "description": "Buyout charges and retained salary the team carries this season; null when unreadable."
+          },
+          "summary": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "capLimits": {
+                "$ref": "#/components/schemas/CapLimits"
+              },
+              "rosterCapHit": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "rosterCount": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "rosterWithFigure": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "offRosterCount": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "expiring": {
+                "$ref": "#/components/schemas/ExpiringCounts"
+              },
+              "deadCapTotal": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "capSpaceEstimate": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Ceiling minus the roster cap hit, dead cap and LTIR players missing from the roster list. An estimate, not cap space: `estimateNotes` says what it leaves out (no_ltir, no_bonus_overages, no_recapture, partial_coverage)."
+              },
+              "estimateNotes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ltir": {
+                "$ref": "#/components/schemas/LtirSummary"
+              }
+            },
+            "required": [
+              "capLimits",
+              "rosterCapHit",
+              "rosterCount",
+              "rosterWithFigure",
+              "offRosterCount",
+              "expiring",
+              "deadCapTotal",
+              "capSpaceEstimate",
+              "estimateNotes",
+              "ltir"
+            ]
+          }
+        },
+        "required": [
+          "team",
+          "season",
+          "rosterKnown",
+          "contracts",
+          "missing",
+          "deadCap",
+          "summary"
+        ]
+      },
+      "DeadCapCharge": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "buyout",
+              "retained"
+            ]
+          },
+          "player": {
+            "$ref": "#/components/schemas/ContractPlayer"
+          },
+          "counterparty": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "For retained salary: the team the player was traded to, when stated."
+          },
+          "capHit": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "pct": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Share of salary retained, when stated."
+          },
+          "eventDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "contractKey": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tier": {
+            "$ref": "#/components/schemas/ContractSourceTier"
+          }
+        },
+        "required": [
+          "kind",
+          "player",
+          "counterparty",
+          "capHit",
+          "pct",
+          "eventDate",
+          "contractKey",
+          "tier"
+        ]
+      },
+      "CapLimits": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "ceiling": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "floor": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "minSalary": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "ceiling",
+          "floor",
+          "minSalary"
+        ],
+        "description": "The NHL's announced cap ceiling, floor and minimum salary for the season; null when not announced."
+      },
+      "ExpiringCounts": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "ufa": {
+            "type": "integer"
+          },
+          "rfa": {
+            "type": "integer"
+          },
+          "unknown": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ufa",
+          "rfa",
+          "unknown"
+        ],
+        "description": "Contracts ending after the season, by status at expiry."
+      },
+      "LtirSummary": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LtirPlayer"
+            }
+          },
+          "capHitTotal": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Sum of their cap hits: an upper bound on relief, not the relief."
+          },
+          "statedRelief": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "statedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "offRosterCapHit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Cap hits of LTIR players missing from the NHL's roster list, which the estimate still counts."
+          }
+        },
+        "required": [
+          "players",
+          "capHitTotal",
+          "statedRelief",
+          "statedAt",
+          "offRosterCapHit"
+        ],
+        "description": "Active long-term injured reserve. Null when the LTIR table could not be read."
+      },
+      "LtirPlayer": {
+        "type": "object",
+        "properties": {
+          "player": {
+            "$ref": "#/components/schemas/ContractPlayer"
+          },
+          "capHit": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "since": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Placement date when a source states it."
+          },
+          "firstSeen": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "First day the dataset saw him on long-term IR."
+          },
+          "onRoster": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "statedRelief": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "LTIR relief as PuckPedia stated it, when it did."
+          },
+          "statedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "conflicts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Where sources disagree, e.g. \"team:BUF|EDM\"."
+          }
+        },
+        "required": [
+          "player",
+          "capHit",
+          "since",
+          "firstSeen",
+          "onRoster",
+          "statedRelief",
+          "statedAt",
+          "conflicts"
+        ]
+      },
+      "LeagueContractsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/LeagueContracts"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "LeagueContracts": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": "integer",
+            "description": "NHL season id.",
+            "example": 20262027
+          },
+          "teamsKnown": {
+            "type": "integer",
+            "description": "Teams whose roster was read (32 when complete)."
+          },
+          "capLimits": {
+            "$ref": "#/components/schemas/CapLimits"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The dataset's contract_key: NHL player id (or normalized name) | signing team | signing month. Null on /v1/nhl/contracts for a roster player the dataset has no contract for.",
+                  "example": "8478427|CAR|2023-07"
+                },
+                "player": {
+                  "$ref": "#/components/schemas/ContractPlayer"
+                },
+                "signingTeam": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Code of the team that signed the contract, as it was then (ARI for the Coyotes). A player traded since keeps it.",
+                  "example": "CAR"
+                },
+                "signedAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Signing date when a source states it, else the date the deal was first published.",
+                  "example": "2023-07-26"
+                },
+                "contractType": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "\"ELC\", \"standard\", \"extension\" or \"PTO\"."
+                },
+                "termYears": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "startSeason": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "NHL season id.",
+                  "example": 20262027
+                },
+                "endSeason": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Last season of the contract (for a bought-out deal, the last season before the buyout).",
+                  "example": 20262027
+                },
+                "yearsLeft": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Seasons left after the requested one (history: after the current season)."
+                },
+                "capHit": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Cap hit in USD for the requested season (history: the contract's stated cap hit or AAV). Null when no source states one."
+                },
+                "capHitBasis": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "season",
+                    "contract",
+                    "aav",
+                    null
+                  ],
+                  "description": "Where capHit comes from: the season breakdown, the contract's stated cap hit, or its AAV."
+                },
+                "capHitTier": {
+                  "$ref": "#/components/schemas/ContractSourceTier"
+                },
+                "aav": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Stated average annual value, USD."
+                },
+                "totalValue": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Stated total value, USD."
+                },
+                "oneWay": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "description": "True one-way, false two-way, null not stated."
+                },
+                "expiryType": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "\"UFA\" or \"RFA\" at expiry."
+                },
+                "expiryTypeDerived": {
+                  "type": "boolean",
+                  "description": "True when expiryType was worked out from age and service rules rather than stated by a source."
+                },
+                "current": {
+                  "type": "boolean",
+                  "description": "The dataset marks the contract as running now."
+                },
+                "boughtOut": {
+                  "type": "boolean"
+                },
+                "endSeasonSigned": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "For a bought-out contract: the season it was signed to run through.",
+                  "example": 20262027
+                },
+                "tier": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ContractSourceTier"
+                    },
+                    {
+                      "description": "Best source tier behind the contract."
+                    }
+                  ]
+                },
+                "official": {
+                  "type": "boolean",
+                  "description": "True when the best source is tier A-C (club, NHL.com or ESPN)."
+                },
+                "sources": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Number of source documents."
+                },
+                "conflicts": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Fields the sources disagree on (left null rather than picked), e.g. [\"aav_usd\"]."
+                },
+                "currentTeam": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Code of the roster the player is on now (signingTeam may differ)."
+                },
+                "position": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "onRoster": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "key",
+                "player",
+                "signingTeam",
+                "signedAt",
+                "contractType",
+                "termYears",
+                "startSeason",
+                "endSeason",
+                "yearsLeft",
+                "capHit",
+                "capHitBasis",
+                "capHitTier",
+                "aav",
+                "totalValue",
+                "oneWay",
+                "expiryType",
+                "expiryTypeDerived",
+                "current",
+                "boughtOut",
+                "endSeasonSigned",
+                "tier",
+                "official",
+                "sources",
+                "conflicts",
+                "currentTeam",
+                "position",
+                "onRoster"
+              ]
+            },
+            "description": "Every player on an NHL roster today or with a contract covering the season, cap hit descending, figures first. No clauses (see the player route)."
+          }
+        },
+        "required": [
+          "season",
+          "teamsKnown",
+          "capLimits",
+          "players"
+        ]
+      },
+      "TeamCapSummariesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TeamCapSummaries"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "TeamCapSummaries": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": "integer",
+            "description": "NHL season id.",
+            "example": 20262027
+          },
+          "basis": {
+            "type": "string",
+            "enum": [
+              "roster",
+              "signing_team"
+            ]
+          },
+          "capLimits": {
+            "$ref": "#/components/schemas/CapLimits"
+          },
+          "teamsKnown": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "basis=roster: teams whose roster was read."
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "team": {
+                  "type": "string",
+                  "description": "Team code.",
+                  "example": "CAR"
+                },
+                "contracts": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "basis=signing_team: contracts the team signed that cover the season."
+                },
+                "withFigure": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "capHitTotal": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "basis=signing_team: cap hits of those contracts."
+                },
+                "rosterCount": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "rosterWithFigure": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "rosterCapHit": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "offRosterCount": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "expiring": {
+                  "$ref": "#/components/schemas/ExpiringCounts"
+                },
+                "deadCapTotal": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "capSpaceEstimate": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "basis=roster. Ceiling minus the roster cap hit, dead cap and LTIR players missing from the roster list. An estimate, not cap space: `estimateNotes` says what it leaves out (no_ltir, no_bonus_overages, no_recapture, partial_coverage)."
+                },
+                "ltir": {
+                  "$ref": "#/components/schemas/LtirSummary"
+                }
+              },
+              "required": [
+                "team",
+                "contracts",
+                "withFigure",
+                "capHitTotal",
+                "rosterCount",
+                "rosterWithFigure",
+                "rosterCapHit",
+                "offRosterCount",
+                "expiring",
+                "deadCapTotal",
+                "capSpaceEstimate",
+                "ltir"
+              ]
+            }
+          },
+          "estimateNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "season",
+          "basis",
+          "capLimits",
+          "teamsKnown",
+          "teams",
+          "estimateNotes"
         ]
       },
       "PowerRankingsResponse": {
@@ -3892,6 +5200,385 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ScoutingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/players/{playerId}/contracts": {
+      "get": {
+        "operationId": "getNhlPlayerContracts",
+        "tags": [
+          "Contracts"
+        ],
+        "summary": "A player's contracts",
+        "description": "Every contract the dataset has for the player, newest first, with season-by-season salary and clauses; `current` is the one covering `season`. CC0, from the nhl-contracts dataset; tiers and conflicts as in the Contracts tag.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "8478427"
+            },
+            "required": true,
+            "name": "playerId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}(\\d{4})$",
+              "description": "NHL season id. Defaults to the current season.",
+              "example": "20262027"
+            },
+            "required": false,
+            "description": "NHL season id. Defaults to the current season.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Player contracts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerContractsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/teams/{team}/contracts": {
+      "get": {
+        "operationId": "getNhlTeamContracts",
+        "tags": [
+          "Contracts"
+        ],
+        "summary": "A team's contracts for a season",
+        "description": "One contract per roster player plus the team's deals for players now elsewhere, roster players with no public figure, dead cap, LTIR, and a cap-space estimate. CC0, from the nhl-contracts dataset; tiers and conflicts as in the Contracts tag.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z]{3}$",
+              "example": "CAR"
+            },
+            "required": true,
+            "name": "team",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}(\\d{4})$",
+              "description": "NHL season id. Defaults to the current season.",
+              "example": "20262027"
+            },
+            "required": false,
+            "description": "NHL season id. Defaults to the current season.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Team contracts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamContractsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/contracts": {
+      "get": {
+        "operationId": "getNhlContracts",
+        "tags": [
+          "Contracts"
+        ],
+        "summary": "Every NHL player's contract for a season",
+        "description": "One row per player on a roster today or under contract for the season: cap hit, term, expiry, source tier; cap hit descending. No clauses (see the player route). CC0, from the nhl-contracts dataset; tiers and conflicts as in the Contracts tag.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}(\\d{4})$",
+              "description": "NHL season id. Defaults to the current season.",
+              "example": "20262027"
+            },
+            "required": false,
+            "description": "NHL season id. Defaults to the current season.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "League contracts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeagueContractsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/contracts/teams": {
+      "get": {
+        "operationId": "getNhlTeamCapSummaries",
+        "tags": [
+          "Contracts"
+        ],
+        "summary": "Every team's cap totals for a season",
+        "description": "`basis=roster` (default): each roster's cap hit, dead cap, LTIR and a cap-space estimate. `basis=signing_team`: the contracts each team signed that cover the season. CC0, from the nhl-contracts dataset; tiers and conflicts as in the Contracts tag.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}(\\d{4})$",
+              "description": "NHL season id. Defaults to the current season.",
+              "example": "20262027"
+            },
+            "required": false,
+            "description": "NHL season id. Defaults to the current season.",
+            "name": "season",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "roster",
+                "signing_team"
+              ],
+              "description": "Defaults to roster.",
+              "example": "roster"
+            },
+            "required": false,
+            "description": "Defaults to roster.",
+            "name": "basis",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Team cap totals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamCapSummariesResponse"
                 }
               }
             }

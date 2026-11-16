@@ -1,0 +1,133 @@
+{
+ "season": "2026-27",
+ "basis": "roster",
+ "asOf": "2026-11-16T06:08:57+00:00",
+ "capLimits": {
+  "ceiling": 104000000,
+  "floor": 76900000,
+  "minSalary": 850000
+ },
+ "teamsKnown": 32,
+ "deadCapKnown": true,
+ "ltirKnown": true,
+ "estimateNotes": [
+  "no_bonus_overages",
+  "no_recapture",
+  "partial_coverage"
+ ],
+ "teams": [
+  {
+   "team": "FLA",
+   "rosterCount": 25,
+   "rosterWithFigure": 24,
+   "rosterCapHit": 109213214,
+   "offRosterCount": 12,
+   "expiring": {
+    "ufa": 5,
+    "rfa": 1,
+    "unknown": 0
+   },
+   "deadCap": 0,
+   "ltir": {
+    "players": [
+     {
+      "playerId": 8477493,
+      "name": "Aleksander Barkov",
+      "capHit": 10000000,
+      "since": "2026-10-03",
+      "firstSeen": "2026-10-03",
+      "onRoster": true,
+      "statedRelief": null,
+      "statedAt": null,
+      "conflicts": []
+     },
+     {
+      "playerId": 8479981,
+      "name": "Jonah Gadjovich",
+      "capHit": 895000,
+      "since": null,
+      "firstSeen": "2026-11-08",
+      "onRoster": true,
+      "statedRelief": null,
+      "statedAt": null,
+      "conflicts": []
+     }
+    ],
+    "capHitTotal": 10895000,
+    "statedRelief": null,
+    "statedAt": null,
+    "offRosterCapHit": 0
+   },
+   "capSpaceEstimate": -5213214
+  },
+  {
+   "team": "VGK",
+   "rosterCount": 22,
+   "rosterWithFigure": 22,
+   "rosterCapHit": 107875830,
+   "offRosterCount": 13,
+   "expiring": {
+    "ufa": 6,
+    "rfa": 3,
+    "unknown": 0
+   },
+   "deadCap": 0,
+   "ltir": {
+    "players": [
+     {
+      "playerId": 8478109,
+      "name": "Victor Olofsson",
+      "capHit": 1638330,
+      "since": "2026-10-11",
+      "firstSeen": "2026-10-11",
+      "onRoster": true,
+      "statedRelief": 1640000,
+      "statedAt": "2026-10-11",
+      "conflicts": [
+       "espn_not_listed"
+      ]
+     }
+    ],
+    "capHitTotal": 1638330,
+    "statedRelief": 1640000,
+    "statedAt": "2026-10-11",
+    "offRosterCapHit": 0
+   },
+   "capSpaceEstimate": -3875830
+  },
+  {
+   "team": "ANA",
+   "rosterCount": 26,
+   "rosterWithFigure": 23,
+   "rosterCapHit": 106305000,
+   "offRosterCount": 9,
+   "expiring": {
+    "ufa": 4,
+    "rfa": 7,
+    "unknown": 0
+   },
+   "deadCap": 0,
+   "ltir": {
+    "players": [
+     {
+      "playerId": 8480068,
+      "name": "Ryan Poehling",
+      "capHit": 3750000,
+      "since": "2026-11-11",
+      "firstSeen": "2026-11-11",
+      "onRoster": true,
+      "statedRelief": null,
+      "statedAt": null,
+      "conflicts": []
+     }
+    ],
+    "capHitTotal": 3750000,
+    "statedRelief": null,
+    "statedAt": null,
+    "offRosterCapHit": 0
+   },
+   "capSpaceEstimate": -2305000
+  }
+ ],
+ "unavailable": false
+}
