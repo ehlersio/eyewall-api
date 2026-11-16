@@ -1,6 +1,6 @@
 # EyeWall API
 
-A public, versioned API for the hockey models built by [EyeWall Analytics](https://eyewallanalytics.com): Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a scorecard of how the models have done, for the **NHL, PWHL, AHL and ECHL**.
+A public, versioned API for the hockey models built by [EyeWall Analytics](https://eyewallanalytics.com): Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a scorecard of how the models have done, for the **NHL, PWHL, AHL and ECHL**; and NHL contracts from EyeWall's open [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset.
 
 - **Base URL:** `https://api.eyewallanalytics.com`
 - **Docs:** [api.eyewallanalytics.com/docs](https://api.eyewallanalytics.com/docs)
@@ -40,8 +40,13 @@ curl https://api.eyewallanalytics.com/v1/nhl/playoff-odds
 | `GET /v1/nhl/games/{gameId}/recap?team=&locale=` ¹ | EyeWall AI's recap for one side |
 | `GET /v1/nhl/games/{gameId}/preview[?locale=]` ¹ | EyeWall AI's game preview |
 | `GET /v1/nhl/players/{playerId}/scouting[?season=&locale=]` ¹ | EyeWall AI's scouting report |
+| `GET /v1/nhl/players/{playerId}/contracts[?season=]` ² | Every contract the dataset has for the player, with season-by-season salary and clauses, and the one covering the season |
+| `GET /v1/nhl/teams/{team}/contracts[?season=]` ² | A team's contracts for a season, roster players without a public figure, dead cap, LTIR and a cap-space estimate |
+| `GET /v1/nhl/contracts[?season=]` ² | Every rostered player's contract for the season, cap hit descending |
+| `GET /v1/nhl/contracts/teams[?season=&basis=roster\|signing_team]` ² | Every team's cap totals |
 
 ¹ Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial only (see Licence).
+² From the [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset: CC0. Every contract carries its best source tier (A club release, B NHL.com story, C ESPN wire, D PuckPedia's public posts or insiders on r/hockey, E archived CapFriendly), its source count and the fields its sources disagree on (left null, never picked). The per-source claims are in the dataset's release files.
 
 `{league}` is `nhl`, `pwhl`, `ahl` or `echl`. NHL ids are the NHL's; PWHL, AHL and ECHL ids are HockeyTech's.
 
@@ -55,7 +60,7 @@ Every league-wide table (teams, Elo, playoff odds, power rankings, NHL RAPM and 
 
 ## What's not here
 
-Box scores, play-by-play, shot locations, rosters, standings and schedules belong to the leagues (NHL, HockeyTech). This API serves only what EyeWall computes, plus the ids and team codes you need to join it to those feeds. NHL contracts are a separate open dataset: [ehlersio/nhl-contracts](https://github.com/ehlersio/nhl-contracts) (CC0).
+Box scores, play-by-play, shot locations, rosters, standings and schedules belong to the leagues (NHL, HockeyTech). This API serves only what EyeWall computes or collects, plus the ids and team codes you need to join it to those feeds. For every row of the contracts dataset (per-source claims, evidence sentences, gaps), download [ehlersio/nhl-contracts](https://github.com/ehlersio/nhl-contracts)' release files instead of the API.
 
 ## Licence
 
@@ -63,6 +68,8 @@ Box scores, play-by-play, shot locations, rosters, standings and schedules belon
 - **Code:** [MIT](LICENSE).
 
 - **NHL models built on [MoneyPuck](https://moneypuck.com) inputs** (routes marked ¹: WAR, NHL power rankings, team needs, trade fit, EyeWall AI's NHL text): [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), non-commercial use only, crediting **"EyeWall Analytics (eyewallanalytics.com), using data from MoneyPuck.com"**. MoneyPuck's own numbers (their game xG, goals saved above expected, Game Score) are never served; goalie ratings are left out for that reason.
+
+- **NHL contracts** (routes marked ²): [CC0](https://creativecommons.org/publicdomain/zero/1.0/), like the [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset. Credit is appreciated, not required.
 
 Injury statuses (ESPN) are never included.
 

@@ -1,0 +1,212 @@
+{
+ "team": "EDM",
+ "season": "2026-27",
+ "asOf": "2026-11-16T06:08:57+00:00",
+ "rosterKnown": true,
+ "rows": [
+  {
+   "contractKey": "8477934|EDM|2024-09",
+   "playerId": 8477934,
+   "name": "Leon Draisaitl",
+   "team": "EDM",
+   "capHit": 14000000,
+   "capHitSource": "aav",
+   "capHitTier": "B",
+   "aav": 14000000,
+   "totalValue": 112000000,
+   "termYears": 8,
+   "startSeason": "2025-26",
+   "expiresAfter": "2032-33",
+   "yearsLeft": 6,
+   "isCurrent": true,
+   "expiryType": "UFA",
+   "expiryTypeDerived": true,
+   "expiryStatus": null,
+   "contractType": "extension",
+   "oneWay": null,
+   "signedAt": "2024-09-03",
+   "tier": "B",
+   "official": true,
+   "sources": 2,
+   "conflicts": null,
+   "boughtOut": false,
+   "endSeasonSigned": null,
+   "clauses": [],
+   "position": "C",
+   "onRoster": true,
+   "alternates": 0
+  },
+  {
+   "contractKey": "8478402|EDM|2025-10",
+   "playerId": 8478402,
+   "name": "Connor McDavid",
+   "team": "EDM",
+   "capHit": 12500000,
+   "capHitSource": "season",
+   "capHitTier": "D",
+   "aav": 12500000,
+   "totalValue": 25000000,
+   "termYears": 2,
+   "startSeason": "2026-27",
+   "expiresAfter": "2027-28",
+   "yearsLeft": 1,
+   "isCurrent": true,
+   "expiryType": "UFA",
+   "expiryTypeDerived": true,
+   "expiryStatus": null,
+   "contractType": "extension",
+   "oneWay": null,
+   "signedAt": "2025-10-06",
+   "tier": "B",
+   "official": true,
+   "sources": 4,
+   "conflicts": null,
+   "boughtOut": false,
+   "endSeasonSigned": null,
+   "clauses": [
+    {
+     "kind": "NMC",
+     "from": null,
+     "to": null,
+     "listSize": null,
+     "listType": null,
+     "tier": "D"
+    }
+   ],
+   "position": "C",
+   "onRoster": true,
+   "alternates": 0
+  },
+  {
+   "contractKey": "8480803|EDM|2025-07",
+   "playerId": 8480803,
+   "name": "Evan Bouchard",
+   "team": "EDM",
+   "capHit": 10500000,
+   "capHitSource": "season",
+   "capHitTier": "D",
+   "aav": 10500000,
+   "totalValue": 42000000,
+   "termYears": 4,
+   "startSeason": "2025-26",
+   "expiresAfter": "2028-29",
+   "yearsLeft": 2,
+   "isCurrent": true,
+   "expiryType": "UFA",
+   "expiryTypeDerived": true,
+   "expiryStatus": null,
+   "contractType": "standard",
+   "oneWay": null,
+   "signedAt": "2025-07-01",
+   "tier": "B",
+   "official": true,
+   "sources": 2,
+   "conflicts": null,
+   "boughtOut": false,
+   "endSeasonSigned": null,
+   "clauses": [
+    {
+     "kind": "NMC",
+     "from": "2027-28",
+     "to": "2027-28",
+     "listSize": null,
+     "listType": null,
+     "tier": "D"
+    },
+    {
+     "kind": "NMC",
+     "from": "2028-29",
+     "to": "2028-29",
+     "listSize": null,
+     "listType": null,
+     "tier": "D"
+    }
+   ],
+   "position": "D",
+   "onRoster": true,
+   "alternates": 0
+  }
+ ],
+ "missing": [],
+ "deadCap": [
+  {
+   "team": "EDM",
+   "kind": "buyout",
+   "playerName": "Jack Campbell",
+   "playerId": null,
+   "counterparty": null,
+   "season": "2026-27",
+   "capHit": 2600000,
+   "pct": null,
+   "contractKey": "jack campbell|EDM|2022-07",
+   "eventDate": null,
+   "tier": "E",
+   "flags": [
+    "team_page_dead_cap"
+   ]
+  }
+ ],
+ "deadCapKnown": true,
+ "summary": {
+  "rosterCapHit": 100849167,
+  "rosterCount": 27,
+  "rosterWithFigure": 27,
+  "rosterWithoutFigure": 0,
+  "offRosterCount": 12,
+  "capLimits": {
+   "ceiling": 104000000,
+   "floor": 76900000,
+   "minSalary": 850000
+  },
+  "expiring": {
+   "ufa": 8,
+   "rfa": 3,
+   "unknown": 0
+  },
+  "deadCap": {
+   "total": 2600000,
+   "retained": 0,
+   "buyouts": 2600000,
+   "count": 1
+  },
+  "capSpaceEstimate": 550833,
+  "estimateNotes": [
+   "no_bonus_overages",
+   "no_recapture",
+   "partial_coverage"
+  ],
+  "ltir": {
+   "players": [
+    {
+     "playerId": 8483512,
+     "name": "Matt Savoie",
+     "capHit": 886667,
+     "since": null,
+     "firstSeen": "2026-11-08",
+     "onRoster": true,
+     "statedRelief": null,
+     "statedAt": null,
+     "conflicts": [
+      "team:BUF|EDM"
+     ]
+    },
+    {
+     "playerId": 8480831,
+     "name": "Alec Regula",
+     "capHit": 775000,
+     "since": "2026-10-01",
+     "firstSeen": "2026-10-01",
+     "onRoster": true,
+     "statedRelief": null,
+     "statedAt": null,
+     "conflicts": []
+    }
+   ],
+   "capHitTotal": 1661667,
+   "statedRelief": null,
+   "statedAt": null,
+   "offRosterCapHit": 0
+  }
+ },
+ "unavailable": false
+}

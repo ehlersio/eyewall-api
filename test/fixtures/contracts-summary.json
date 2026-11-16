@@ -1,0 +1,46 @@
+{
+ "season": "2026-27",
+ "basis": "signing_team",
+ "asOf": "2026-11-16T06:08:57+00:00",
+ "capLimits": {
+  "ceiling": 104000000,
+  "floor": 76900000,
+  "minSalary": 850000
+ },
+ "teams": [
+  {
+   "team": "ANA",
+   "contracts": 38,
+   "withFigure": 34,
+   "capHitTotal": 133590667,
+   "expiring": {
+    "ufa": 6,
+    "rfa": 11,
+    "unknown": 0
+   }
+  },
+  {
+   "team": "NYR",
+   "contracts": 47,
+   "withFigure": 41,
+   "capHitTotal": 129487167,
+   "expiring": {
+    "ufa": 14,
+    "rfa": 16,
+    "unknown": 0
+   }
+  },
+  {
+   "team": "BUF",
+   "contracts": 32,
+   "withFigure": 32,
+   "capHitTotal": 126791405,
+   "expiring": {
+    "ufa": 7,
+    "rfa": 9,
+    "unknown": 0
+   }
+  }
+ ],
+ "unavailable": false
+}

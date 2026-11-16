@@ -18,12 +18,13 @@ import { registerPercentiles } from './routes/percentiles.js';
 import { registerLineups } from './routes/lineups.js';
 import { registerNhlModels } from './routes/nhlModels.js';
 import { registerNhlText } from './routes/nhlText.js';
+import { CONTRACTS_TAG_DESCRIPTION, registerContracts } from './routes/contracts.js';
 
-const DESCRIPTION = `Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done.
+const DESCRIPTION = `Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done; and NHL contracts from EyeWall's open [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset.
 
-**What's here.** Only numbers EyeWall produces. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.
+**What's here.** Only numbers EyeWall produces, and the contracts dataset EyeWall collects. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.
 
-**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit "${ATTRIBUTION}" wherever it appears. The exception is NHL models built on [MoneyPuck](https://moneypuck.com) inputs (WAR, NHL power rankings, team needs, trade fit, and EyeWall AI's NHL text): those are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), non-commercial only, crediting MoneyPuck.com as well. Each response's \`meta.license\` and \`meta.attribution\` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).
+**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit "${ATTRIBUTION}" wherever it appears. The exception is NHL models built on [MoneyPuck](https://moneypuck.com) inputs (WAR, NHL power rankings, team needs, trade fit, and EyeWall AI's NHL text): those are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), non-commercial only, crediting MoneyPuck.com as well. NHL contracts are [CC0](https://creativecommons.org/publicdomain/zero/1.0/) (no credit required), like the dataset they come from. Each response's \`meta.license\` and \`meta.attribution\` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).
 
 **Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.
 
@@ -37,7 +38,7 @@ export const OPENAPI_CONFIG = {
     title: 'EyeWall API',
     version: API_VERSION,
     description: DESCRIPTION,
-    license: { name: 'MIT (code); data CC BY 4.0', identifier: 'MIT' },
+    license: { name: 'MIT (code); data CC BY 4.0, CC BY-NC 4.0 or CC0 per route', identifier: 'MIT' },
     contact: { name: 'EyeWall Analytics', url: 'https://eyewallanalytics.com' },
   },
   servers: [{ url: 'https://api.eyewallanalytics.com' }],
@@ -52,6 +53,7 @@ export const OPENAPI_CONFIG = {
     { name: 'Players', description: 'Per-player percentiles and shot-quality numbers.' },
     { name: 'Lineups', description: 'Projected lines, team needs and starting goalies.' },
     { name: 'EyeWall AI', description: 'Recaps, previews and scouting reports written by EyeWall AI from EyeWall\'s data.' },
+    { name: 'Contracts', description: CONTRACTS_TAG_DESCRIPTION },
     { name: 'Model grades', description: 'How the models have done.' },
   ],
 };
@@ -108,6 +110,7 @@ export function createApp() {
   // match /v1/{league}/power-rankings (PWHL/AHL/ECHL only, a 400 for nhl).
   registerNhlModels(app);
   registerNhlText(app);
+  registerContracts(app);
   registerPowerRankings(app);
   registerPercentiles(app);
   registerLineups(app);

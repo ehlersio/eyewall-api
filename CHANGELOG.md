@@ -2,6 +2,15 @@
 
 `/v1` changes are additive only. Breaking changes go to a new version.
 
+## 1.3.0 — 2026-11-16
+
+Added (NHL, CC0 from the nhl-contracts dataset):
+
+- `GET /v1/nhl/players/{playerId}/contracts`
+- `GET /v1/nhl/teams/{team}/contracts`
+- `GET /v1/nhl/contracts`
+- `GET /v1/nhl/contracts/teams`
+
 ## 1.2.1 — 2026-11-16
 
 - `GET /llms.txt`: a plain-text route index for AI agents.

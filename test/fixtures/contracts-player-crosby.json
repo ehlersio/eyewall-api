@@ -1,0 +1,441 @@
+{
+ "playerId": 8471675,
+ "season": "2026-27",
+ "asOf": "2026-11-16T06:08:57+00:00",
+ "current": {
+  "contractKey": "8471675|PIT|2024-09",
+  "playerId": 8471675,
+  "name": "Sidney Crosby",
+  "team": "PIT",
+  "capHit": 8700000,
+  "capHitSource": "aav",
+  "capHitTier": "B",
+  "aav": 8700000,
+  "totalValue": 17400000,
+  "termYears": 2,
+  "startSeason": "2025-26",
+  "expiresAfter": "2026-27",
+  "yearsLeft": 0,
+  "isCurrent": true,
+  "expiryType": "UFA",
+  "expiryTypeDerived": true,
+  "expiryStatus": null,
+  "contractType": "extension",
+  "oneWay": null,
+  "signedAt": "2024-09-16",
+  "tier": "B",
+  "official": true,
+  "sources": 2,
+  "conflicts": null,
+  "boughtOut": false,
+  "endSeasonSigned": null,
+  "clauses": [],
+  "clauseStatus": {
+   "status": "unknown",
+   "basis": null
+  }
+ },
+ "history": [
+  {
+   "contractKey": "8471675|PIT|2024-09",
+   "playerId": 8471675,
+   "name": "Sidney Crosby",
+   "team": "PIT",
+   "capHit": 8700000,
+   "capHitSource": "aav",
+   "capHitTier": "B",
+   "aav": 8700000,
+   "totalValue": 17400000,
+   "termYears": 2,
+   "startSeason": "2025-26",
+   "expiresAfter": "2026-27",
+   "yearsLeft": 0,
+   "isCurrent": true,
+   "expiryType": "UFA",
+   "expiryTypeDerived": true,
+   "expiryStatus": null,
+   "contractType": "extension",
+   "oneWay": null,
+   "signedAt": "2024-09-16",
+   "tier": "B",
+   "official": true,
+   "sources": 2,
+   "conflicts": null,
+   "boughtOut": false,
+   "endSeasonSigned": null,
+   "clauses": [],
+   "seasons": []
+  },
+  {
+   "contractKey": "8471675|PIT|2012-07",
+   "playerId": 8471675,
+   "name": "Sidney Crosby",
+   "team": "PIT",
+   "capHit": 8700000,
+   "capHitSource": "contract",
+   "capHitTier": "E",
+   "aav": 8700000,
+   "totalValue": 104400000,
+   "termYears": 12,
+   "startSeason": "2013-14",
+   "expiresAfter": "2024-25",
+   "yearsLeft": 0,
+   "isCurrent": false,
+   "expiryType": "UFA",
+   "expiryTypeDerived": false,
+   "expiryStatus": "UFA",
+   "contractType": "extension",
+   "oneWay": true,
+   "signedAt": "2012-07-01",
+   "tier": "E",
+   "official": false,
+   "sources": 1,
+   "conflicts": null,
+   "boughtOut": false,
+   "endSeasonSigned": null,
+   "clauses": [
+    {
+     "kind": "NMC",
+     "from": "2013-14",
+     "to": "2024-25",
+     "listSize": null,
+     "listType": null,
+     "tier": "E"
+    }
+   ],
+   "seasons": [
+    {
+     "season": "2013-14",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 12000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 12000000,
+     "minorsSalary": 12000000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2014-15",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 12000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 12000000,
+     "minorsSalary": 12000000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2015-16",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 12000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 12000000,
+     "minorsSalary": 12000000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2016-17",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 10900000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 10900000,
+     "minorsSalary": 10900000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2017-18",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 10900000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 10900000,
+     "minorsSalary": 10900000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2018-19",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 10000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 10000000,
+     "minorsSalary": 10000000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2019-20",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 9000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 9000000,
+     "minorsSalary": 9000000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2020-21",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 9600000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 9600000,
+     "minorsSalary": 9600000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2021-22",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 9000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 9000000,
+     "minorsSalary": 9000000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2022-23",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 3000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 3000000,
+     "minorsSalary": 3000000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2023-24",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 3000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 3000000,
+     "minorsSalary": 3000000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    },
+    {
+     "season": "2024-25",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 3000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 3000000,
+     "minorsSalary": 3000000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    }
+   ]
+  },
+  {
+   "contractKey": "8471675|PIT|2007-07",
+   "playerId": 8471675,
+   "name": "Sidney Crosby",
+   "team": "PIT",
+   "capHit": 8700000,
+   "capHitSource": "contract",
+   "capHitTier": "E",
+   "aav": 8700000,
+   "totalValue": 43500000,
+   "termYears": 5,
+   "startSeason": "2008-09",
+   "expiresAfter": "2012-13",
+   "yearsLeft": 0,
+   "isCurrent": false,
+   "expiryType": "UFA",
+   "expiryTypeDerived": false,
+   "expiryStatus": "UFA",
+   "contractType": "extension",
+   "oneWay": true,
+   "signedAt": "2007-07-07",
+   "tier": "E",
+   "official": false,
+   "sources": 1,
+   "conflicts": null,
+   "boughtOut": false,
+   "endSeasonSigned": null,
+   "clauses": [
+    {
+     "kind": "NMC",
+     "from": "2012-13",
+     "to": "2012-13",
+     "listSize": null,
+     "listType": null,
+     "tier": "E"
+    }
+   ],
+   "seasons": [
+    {
+     "season": "2008-09",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 9000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 9000000,
+     "minorsSalary": 9000000,
+     "oneWay": true,
+     "clause": null,
+     "tier": "E",
+     "clauseStatus": {
+      "status": "none",
+      "basis": "capfriendly_2024"
+     }
+    },
+    {
+     "season": "2009-10",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 9000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 9000000,
+     "minorsSalary": 9000000,
+     "oneWay": true,
+     "clause": null,
+     "tier": "E",
+     "clauseStatus": {
+      "status": "none",
+      "basis": "capfriendly_2024"
+     }
+    },
+    {
+     "season": "2010-11",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 9000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 9000000,
+     "minorsSalary": 9000000,
+     "oneWay": true,
+     "clause": null,
+     "tier": "E",
+     "clauseStatus": {
+      "status": "none",
+      "basis": "capfriendly_2024"
+     }
+    },
+    {
+     "season": "2011-12",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 9000000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 9000000,
+     "minorsSalary": 9000000,
+     "oneWay": true,
+     "clause": null,
+     "tier": "E",
+     "clauseStatus": {
+      "status": "none",
+      "basis": "capfriendly_2024"
+     }
+    },
+    {
+     "season": "2012-13",
+     "capHit": 8700000,
+     "aav": 8700000,
+     "baseSalary": 7500000,
+     "signingBonus": 0,
+     "performanceBonus": 0,
+     "totalSalary": 7500000,
+     "minorsSalary": 7500000,
+     "oneWay": true,
+     "clause": "NMC",
+     "tier": "E",
+     "clauseStatus": {
+      "status": "clause",
+      "basis": "source"
+     }
+    }
+   ]
+  }
+ ],
+ "clauseStatusKnown": true,
+ "unavailable": false
+}
