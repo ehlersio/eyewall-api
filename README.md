@@ -48,6 +48,10 @@ Every success is `{ data, meta }`. `meta` carries the league, the model the data
 
 Probabilities are model estimates, not betting odds.
 
+## Bulk files
+
+Every league-wide table (teams, Elo, playoff odds, power rankings, NHL RAPM and WAR) is exported nightly as JSON and CSV to the [`data` release](https://github.com/ehlersio/eyewall-api/releases/tag/data). Files are replaced in place, so a link such as `releases/download/data/nhl-elo.csv` always points to the latest export. `manifest.json` lists each file's licence, attribution and when the data was produced. Use these files for whole tables instead of calling the API in a loop. The export is `scripts/bulk-export.js`, run by `.github/workflows/bulk.yml`.
+
 ## What's not here
 
 Box scores, play-by-play, shot locations, rosters, standings and schedules belong to the leagues (NHL, HockeyTech). This API serves only what EyeWall computes, plus the ids and team codes you need to join it to those feeds. NHL contracts are a separate open dataset: [ehlersio/nhl-contracts](https://github.com/ehlersio/nhl-contracts) (CC0).
@@ -81,6 +85,7 @@ src/
 ├── respond.js        # { data, meta } and problem responses
 └── routes/           # reference, elo, games, playoffOdds, scorecard, powerRankings, percentiles, lineups, nhlModels, nhlText
 scripts/write-openapi.js  # Writes openapi.json (npm run spec)
+scripts/bulk-export.js    # Nightly bulk JSON/CSV (workflow bulk.yml)
 test/                     # Route tests against fixture poller responses
 ```
 

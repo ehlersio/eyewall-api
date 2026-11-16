@@ -17,7 +17,7 @@ export default [
   },
   {
     files: ['scripts/**', 'test/**'],
-    languageOptions: { globals: { ...workerGlobals, process: 'readonly' } },
+    languageOptions: { globals: { ...workerGlobals, process: 'readonly', setTimeout: 'readonly' } },
   },
   { ignores: ['node_modules/', '.wrangler/', 'dist/'] },
 ];

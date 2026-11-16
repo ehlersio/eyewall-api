@@ -2,6 +2,10 @@
 
 `/v1` changes are additive only. Breaking changes go to a new version.
 
+## Bulk files — 2026-11-16
+
+- Nightly JSON + CSV of every league-wide table on the `data` release, with `manifest.json` (licence per file).
+
 ## 1.2.0 — 2026-11-16
 
 Added (NHL):
