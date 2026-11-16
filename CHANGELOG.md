@@ -2,6 +2,11 @@
 
 `/v1` changes are additive only. Breaking changes go to a new version.
 
+## 1.2.1 — 2026-11-16
+
+- `GET /llms.txt`: a plain-text route index for AI agents.
+- Shorter descriptions on `getNhlTeamNeeds` and `getNhlTradeFit` (GPT Actions allow 300 characters).
+
 ## Bulk files — 2026-11-16
 
 - Nightly JSON + CSV of every league-wide table on the `data` release, with `manifest.json` (licence per file).

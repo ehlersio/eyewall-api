@@ -5,6 +5,7 @@ A public, versioned API for the hockey models built by [EyeWall Analytics](https
 - **Base URL:** `https://api.eyewallanalytics.com`
 - **Docs:** [api.eyewallanalytics.com/docs](https://api.eyewallanalytics.com/docs)
 - **OpenAPI 3.1:** [api.eyewallanalytics.com/openapi.json](https://api.eyewallanalytics.com/openapi.json) (also [`openapi.json`](openapi.json) in this repo)
+- **For AI agents:** [api.eyewallanalytics.com/llms.txt](https://api.eyewallanalytics.com/llms.txt). The spec also works as a ChatGPT GPT Action (CI keeps every operation inside the Action limits) or through an OpenAPI-to-MCP bridge.
 
 No key needed. 60 requests a minute per IP.
 

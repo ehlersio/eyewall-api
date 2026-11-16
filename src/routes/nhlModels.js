@@ -311,7 +311,7 @@ export function registerNhlModels(app) {
   app.openapi(createRoute({
     method: 'get', path: '/v1/nhl/teams/{team}/needs', operationId: 'getNhlTeamNeeds', tags: ['Lineups'],
     summary: 'A team\'s lineup slots, rated and ranked league-wide',
-    description: `Each skater slot of the projected lineup (top-6 and bottom-6 centers and wingers, top-4 and third-pair D) with each player's WAR per 82, the slot's strength and its league rank; the bottom third is flagged as a need. ${NC_DESCRIPTION}`,
+    description: `Skater slots of the projected lineup with each player's WAR per 82, the slot's strength and league rank; the bottom third is flagged as a need. ${NC_DESCRIPTION}`,
     request: { params: NhlTeamParam },
     responses: { 200: { description: 'Team needs', content: { 'application/json': { schema: envelope('TeamNeedsResponse', TeamNeeds) } } }, ...problemResponses },
   }), async c => {
@@ -324,7 +324,7 @@ export function registerNhlModels(app) {
   app.openapi(createRoute({
     method: 'get', path: '/v1/nhl/players/{playerId}/trade-fit', operationId: 'getNhlTradeFit', tags: ['Players'],
     summary: 'Which teams a player fits',
-    description: `For a rated player on a current non-entry-level contract: every other team ranked strong / possible / long shot on need (team needs), window (a rental needs a likely playoff team) and cap space. A fit, not a prediction of a trade. ${NC_DESCRIPTION}`,
+    description: `Every other team ranked strong / possible / long shot on need, window (a rental needs a likely playoff team) and cap space. A fit, not a trade prediction. ${NC_DESCRIPTION}`,
     request: { params: z.object({ playerId: NumericId('playerId', '8478427') }) },
     responses: { 200: { description: 'Trade fit', content: { 'application/json': { schema: envelope('TradeFitResponse', TradeFit) } } }, ...problemResponses },
   }), async c => {
