@@ -37,6 +37,6 @@ jobs:
         run: |
           if ! gh release view data >/dev/null 2>&1; then
             gh release create data --title "Bulk data (nightly)" --latest=false \
-              --notes "Nightly JSON and CSV of every league-wide table at api.eyewallanalytics.com. manifest.json lists each file's licence: CC BY 4.0, or CC BY-NC 4.0 for NHL models built on MoneyPuck inputs. Credit the attribution line given for each file. Docs: https://api.eyewallanalytics.com/docs"
+              --notes "Nightly JSON and CSV of every league-wide table at api.eyewallanalytics.com. manifest.json lists each file's licence: CC BY 4.0, CC BY-NC 4.0 for NHL models built on MoneyPuck inputs, or CC0 for NHL contracts. Credit the attribution line given for each file. Docs: https://api.eyewallanalytics.com/docs"
           fi
           gh release upload data bulk/* --clobber

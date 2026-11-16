@@ -10,6 +10,7 @@ Added (NHL, CC0 from the nhl-contracts dataset):
 - `GET /v1/nhl/teams/{team}/contracts`
 - `GET /v1/nhl/contracts`
 - `GET /v1/nhl/contracts/teams`
+- Bulk files: `nhl-contracts`, `nhl-contract-team-totals` and `nhl-contract-team-totals-signing-team` (JSON + CSV, CC0)
 
 ## 1.2.1 — 2026-11-16
 
