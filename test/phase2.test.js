@@ -42,8 +42,9 @@ describe('GET /v1/{league}/power-rankings', () => {
     expect(env.POLLER.fetch).toHaveBeenCalledTimes(2); // rankings + teams
   });
 
-  it('NHL is not offered (MoneyPuck inputs): 400', async () => {
-    expect((await get('/v1/nhl/power-rankings', makeEnv())).status).toBe(400);
+  it('NHL has its own route (CC BY-NC); a league outside the enum is a 400', async () => {
+    expect((await get('/v1/khl/power-rankings', makeEnv())).status).toBe(400);
+    expect((await get('/v1/nhl/players/8478427/percentiles', makeEnv())).status).toBe(400);
   });
 });
 

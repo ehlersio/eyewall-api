@@ -2,11 +2,17 @@
 
 import { z } from '@hono/zod-openapi';
 
-export const API_VERSION = '1.1.0';
+export const API_VERSION = '1.2.0';
 export const DOCS_URL = 'https://api.eyewallanalytics.com/docs';
 
 export const LICENSE_CC_BY = 'CC-BY-4.0';
 export const ATTRIBUTION = 'EyeWall Analytics (eyewallanalytics.com)';
+
+// Models with MoneyPuck inputs: MoneyPuck's data is free for
+// non-commercial use with credit, so these carry both.
+export const LICENSE_CC_BY_NC = 'CC-BY-NC-4.0';
+export const ATTRIBUTION_MONEYPUCK = 'EyeWall Analytics (eyewallanalytics.com), using data from MoneyPuck.com';
+export const NC_DESCRIPTION = 'Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial use only, credit EyeWall Analytics and MoneyPuck.com.';
 
 export const LEAGUES = ['nhl', 'pwhl', 'ahl', 'echl'];
 export const HOCKEYTECH_LEAGUES = ['pwhl', 'ahl', 'echl'];
@@ -67,6 +73,14 @@ export const TeamRef = z.object({
 }).openapi('TeamRef');
 
 export const IsoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).openapi({ example: '2026-11-16' });
+
+export function metaNC(league, source, generatedAt = null) {
+  return meta(league, source, generatedAt, { license: LICENSE_CC_BY_NC, attribution: ATTRIBUTION_MONEYPUCK });
+}
+
+export const NhlTeamParam = z.object({
+  team: z.string().regex(/^[A-Za-z]{3}$/).openapi({ param: { name: 'team', in: 'path' }, example: 'CAR' }),
+});
 
 export function meta(league, source, generatedAt = null, { license = LICENSE_CC_BY, attribution = ATTRIBUTION } = {}) {
   return {

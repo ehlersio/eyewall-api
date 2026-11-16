@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "EyeWall API",
-    "version": "1.1.0",
-    "description": "Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done.\n\n**What's here.** Only numbers EyeWall produces. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.\n\n**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit \"EyeWall Analytics (eyewallanalytics.com)\" wherever it appears. Each response's `meta.license` and `meta.attribution` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).\n\n**Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.\n\n**Stability.** `/v1` only changes by adding things. A breaking change gets a `/v2`, and `/v1` keeps working for at least a full season after.\n\nProbabilities are model estimates, not betting odds.",
+    "version": "1.2.0",
+    "description": "Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done.\n\n**What's here.** Only numbers EyeWall produces. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.\n\n**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit \"EyeWall Analytics (eyewallanalytics.com)\" wherever it appears. The exception is NHL models built on [MoneyPuck](https://moneypuck.com) inputs (WAR, NHL power rankings, team needs, trade fit, and EyeWall AI's NHL text): those are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), non-commercial only, crediting MoneyPuck.com as well. Each response's `meta.license` and `meta.attribution` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).\n\n**Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.\n\n**Stability.** `/v1` only changes by adding things. A breaking change gets a `/v2`, and `/v1` keeps working for at least a full season after.\n\nProbabilities are model estimates, not betting odds.",
     "license": {
       "name": "MIT (code); data CC BY 4.0",
       "identifier": "MIT"
@@ -46,7 +46,11 @@
     },
     {
       "name": "Lineups",
-      "description": "Projected lines and starting goalies."
+      "description": "Projected lines, team needs and starting goalies."
+    },
+    {
+      "name": "EyeWall AI",
+      "description": "Recaps, previews and scouting reports written by EyeWall AI from EyeWall's data."
     },
     {
       "name": "Model grades",
@@ -926,6 +930,866 @@
           "updatedAt"
         ]
       },
+      "RapmResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RapmTable"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "RapmTable": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": "integer"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "player": {
+                  "$ref": "#/components/schemas/PlayerRef"
+                },
+                "team": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/TeamRef"
+                    },
+                    {
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    }
+                  ]
+                },
+                "rapm": {
+                  "type": "number",
+                  "description": "Expected-goal differential per 60 minutes at 5-on-5 above an average player, from a ridge regression over three seasons of shots and shifts."
+                },
+                "minutes": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "5-on-5 minutes in the three-season sample."
+                }
+              },
+              "required": [
+                "player",
+                "team",
+                "rapm",
+                "minutes"
+              ]
+            },
+            "description": "Highest first. Players under 150 minutes in the sample are left out."
+          }
+        },
+        "required": [
+          "season",
+          "players"
+        ]
+      },
+      "PlayerRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "NHL player id.",
+            "example": 8478427
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "position": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "position"
+        ]
+      },
+      "WarResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/WarTable"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "WarTable": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": "integer"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "player": {
+                  "$ref": "#/components/schemas/PlayerRef"
+                },
+                "team": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/TeamRef"
+                    },
+                    {
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    }
+                  ]
+                },
+                "gamesPlayed": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "war": {
+                  "type": "number",
+                  "description": "Wins above replacement this season."
+                }
+              },
+              "required": [
+                "player",
+                "team",
+                "gamesPlayed",
+                "war"
+              ]
+            },
+            "description": "Highest first."
+          }
+        },
+        "required": [
+          "season",
+          "players"
+        ]
+      },
+      "NhlPowerRankingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/NhlPowerRankings"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "NhlPowerRankings": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "runDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16"
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rank": {
+                  "type": "integer"
+                },
+                "previousRank": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "team": {
+                  "$ref": "#/components/schemas/TeamRef"
+                }
+              },
+              "required": [
+                "rank",
+                "previousRank",
+                "team"
+              ]
+            },
+            "description": "Best first."
+          }
+        },
+        "required": [
+          "season",
+          "runDate",
+          "teams"
+        ]
+      },
+      "NhlTeamPowerRankingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/NhlTeamPowerRanking"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "NhlTeamPowerRanking": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamRef"
+          },
+          "rank": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "previousRank": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "runDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16"
+          },
+          "narrative": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "EyeWall AI's paragraph on the ranking (English)."
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "runDate": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                  "example": "2026-11-16"
+                },
+                "rank": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "runDate",
+                "rank"
+              ]
+            },
+            "description": "Up to 28 recent runs this season, oldest first."
+          }
+        },
+        "required": [
+          "team",
+          "rank",
+          "previousRank",
+          "runDate",
+          "narrative",
+          "history"
+        ]
+      },
+      "TeamNeedsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TeamNeeds"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "TeamNeeds": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamRef"
+          },
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "basis": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The lineup the slots come from: \"last_game\" or \"preseason\". Null before the first projection."
+          },
+          "generatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slot": {
+                  "type": "string",
+                  "enum": [
+                    "F_TOP6_C",
+                    "F_TOP6_W",
+                    "F_BOT6_C",
+                    "F_BOT6_W",
+                    "D_TOP4",
+                    "D_BOT2"
+                  ],
+                  "description": "F_TOP6_C/F_TOP6_W/F_BOT6_C/F_BOT6_W (centers/wingers), D_TOP4, D_BOT2."
+                },
+                "players": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "player": {
+                        "$ref": "#/components/schemas/PlayerRef"
+                      },
+                      "shoots": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "rating": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "description": "WAR per 82 games. Null when unrated (too few games this season and last)."
+                      },
+                      "ratingBasis": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "\"season\" (20+ GP this season) or \"last_season\"."
+                      },
+                      "gamesPlayed": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ]
+                      },
+                      "filledIn": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "player",
+                      "shoots",
+                      "rating",
+                      "ratingBasis",
+                      "gamesPlayed",
+                      "filledIn"
+                    ]
+                  }
+                },
+                "strength": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "leagueRank": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "1 = strongest slot in the league."
+                },
+                "leagueTeams": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "need": {
+                  "type": "boolean",
+                  "description": "True for the bottom third of the league in this slot."
+                }
+              },
+              "required": [
+                "slot",
+                "players",
+                "strength",
+                "leagueRank",
+                "leagueTeams",
+                "need"
+              ]
+            },
+            "description": "Skater slots only."
+          }
+        },
+        "required": [
+          "team",
+          "season",
+          "basis",
+          "generatedAt",
+          "slots"
+        ]
+      },
+      "TradeFitResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TradeFit"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "TradeFit": {
+        "type": "object",
+        "properties": {
+          "player": {
+            "type": "object",
+            "properties": {
+              "player": {
+                "$ref": "#/components/schemas/PlayerRef"
+              },
+              "team": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TeamRef"
+                  },
+                  {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  }
+                ]
+              },
+              "season": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "shoots": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rating": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "WAR per 82 games for a skater. Null for a goalie (MoneyPuck's own goals saved above expected)."
+              },
+              "ratingBasis": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "gamesPlayed": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "capHit": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "yearsLeft": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "expiresAfter": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "expiryType": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "\"UFA\" or \"RFA\" at expiry."
+              },
+              "rental": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "True for an expiring contract during the season."
+              },
+              "clause": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "\"NMC\", \"NTC\" or similar; null for none or unknown."
+              },
+              "phase": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "in_season",
+                  "offseason",
+                  null
+                ],
+                "description": "\"offseason\" from the day after the trade deadline: the fit is then for next season."
+              },
+              "rightsOnly": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "player",
+              "team",
+              "season",
+              "shoots",
+              "rating",
+              "ratingBasis",
+              "gamesPlayed",
+              "capHit",
+              "yearsLeft",
+              "expiresAfter",
+              "expiryType",
+              "rental",
+              "clause",
+              "phase",
+              "rightsOnly"
+            ]
+          },
+          "generatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "team": {
+                  "$ref": "#/components/schemas/TeamRef"
+                },
+                "tier": {
+                  "type": "string",
+                  "enum": [
+                    "strong",
+                    "possible",
+                    "long_shot"
+                  ]
+                },
+                "rank": {
+                  "type": "integer"
+                },
+                "slot": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The lineup slot the player would fill."
+                },
+                "gap": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "How much the player would improve that slot, in rating units."
+                },
+                "needMet": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "windowMet": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "description": "For a rental: the team is a likely playoff buyer (50%+ playoff odds)."
+                },
+                "capState": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "\"fits\", \"fits_retained\", \"fits_ltir\" or \"needs_salary\"."
+                },
+                "reasons": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "description": "Structured reasons: each has a `code` (need_upgrade, need_depth, window_term, cap_fits, cap_fits_retained, cap_fits_ltir, cap_needs_salary, …) and the numbers behind it."
+                }
+              },
+              "required": [
+                "team",
+                "tier",
+                "rank",
+                "slot",
+                "gap",
+                "needMet",
+                "windowMet",
+                "capState",
+                "reasons"
+              ]
+            },
+            "description": "Every other team, best fit first."
+          }
+        },
+        "required": [
+          "player",
+          "generatedAt",
+          "teams"
+        ]
+      },
+      "GameRecapResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GameRecap"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "GameRecap": {
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer"
+          },
+          "team": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamRef"
+              },
+              {
+                "description": "The side the recap is written for."
+              }
+            ]
+          },
+          "locale": {
+            "$ref": "#/components/schemas/Locale"
+          },
+          "text": {
+            "type": "string"
+          },
+          "cardText": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A one-line version for cards and notifications."
+          },
+          "generatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "gameId",
+          "team",
+          "locale",
+          "text",
+          "cardText",
+          "generatedAt"
+        ]
+      },
+      "Locale": {
+        "type": "string",
+        "enum": [
+          "en",
+          "fr"
+        ],
+        "description": "Language of EyeWall AI text.",
+        "example": "en"
+      },
+      "GamePreviewResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GamePreview"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "GamePreview": {
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer"
+          },
+          "locale": {
+            "$ref": "#/components/schemas/Locale"
+          },
+          "matchup": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Line-by-line matchup analysis."
+          },
+          "prediction": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The pregame read."
+          },
+          "generatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "gameId",
+          "locale",
+          "matchup",
+          "prediction",
+          "generatedAt"
+        ]
+      },
+      "ScoutingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ScoutingReport"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "ScoutingReport": {
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "integer"
+          },
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "locale": {
+            "$ref": "#/components/schemas/Locale"
+          },
+          "text": {
+            "type": "string"
+          },
+          "generatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "playerId",
+          "season",
+          "locale",
+          "text",
+          "generatedAt"
+        ]
+      },
       "PowerRankingsResponse": {
         "type": "object",
         "properties": {
@@ -1111,15 +1975,6 @@
           "narrative",
           "history"
         ]
-      },
-      "Locale": {
-        "type": "string",
-        "enum": [
-          "en",
-          "fr"
-        ],
-        "description": "Language of EyeWall AI text.",
-        "example": "en"
       },
       "SkaterPercentilesResponse": {
         "type": "object",
@@ -2213,6 +3068,830 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ScorecardResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/rapm": {
+      "get": {
+        "operationId": "getNhlRapm",
+        "tags": [
+          "Players"
+        ],
+        "summary": "RAPM for every NHL skater",
+        "description": "Regularized adjusted plus-minus: each skater's 5-on-5 expected-goal impact with teammates, opponents and score state accounted for. Three-season rolling sample, recomputed nightly for the current season. Uses EyeWall's own shot-location xG (no MoneyPuck input).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{8}$",
+              "description": "NHL season id. Defaults to the current season.",
+              "example": "20262027"
+            },
+            "required": false,
+            "description": "NHL season id. Defaults to the current season.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "RAPM",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RapmResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/war": {
+      "get": {
+        "operationId": "getNhlWar",
+        "tags": [
+          "Players"
+        ],
+        "summary": "WAR for every NHL player",
+        "description": "Wins above replacement: EyeWall's formula from RAPM, finishing, and penalties taken and drawn. Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial use only, credit EyeWall Analytics and MoneyPuck.com.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{8}$",
+              "description": "NHL season id. Defaults to the current season.",
+              "example": "20262027"
+            },
+            "required": false,
+            "description": "NHL season id. Defaults to the current season.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "WAR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/power-rankings": {
+      "get": {
+        "operationId": "getNhlPowerRankings",
+        "tags": [
+          "Rankings"
+        ],
+        "summary": "NHL power rankings",
+        "description": "EyeWall's nightly NHL power rankings: points percentage, the last 10 games, goal difference, 5-on-5 xGF% and special teams, with roster WAR weighed in early in the season. Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial use only, credit EyeWall Analytics and MoneyPuck.com.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{8}$",
+              "description": "NHL season id. Defaults to the current season.",
+              "example": "20262027"
+            },
+            "required": false,
+            "description": "NHL season id. Defaults to the current season.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Power rankings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NhlPowerRankingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/teams/{team}/power-ranking": {
+      "get": {
+        "operationId": "getNhlTeamPowerRanking",
+        "tags": [
+          "Rankings"
+        ],
+        "summary": "One NHL team's power ranking, with EyeWall AI's paragraph",
+        "description": "Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial use only, credit EyeWall Analytics and MoneyPuck.com.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z]{3}$",
+              "example": "CAR"
+            },
+            "required": true,
+            "name": "team",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{8}$",
+              "description": "NHL season id. Defaults to the current season.",
+              "example": "20262027"
+            },
+            "required": false,
+            "description": "NHL season id. Defaults to the current season.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Team power ranking",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NhlTeamPowerRankingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/teams/{team}/needs": {
+      "get": {
+        "operationId": "getNhlTeamNeeds",
+        "tags": [
+          "Lineups"
+        ],
+        "summary": "A team's lineup slots, rated and ranked league-wide",
+        "description": "Each skater slot of the projected lineup (top-6 and bottom-6 centers and wingers, top-4 and third-pair D) with each player's WAR per 82, the slot's strength and its league rank; the bottom third is flagged as a need. Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial use only, credit EyeWall Analytics and MoneyPuck.com.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z]{3}$",
+              "example": "CAR"
+            },
+            "required": true,
+            "name": "team",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Team needs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamNeedsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/players/{playerId}/trade-fit": {
+      "get": {
+        "operationId": "getNhlTradeFit",
+        "tags": [
+          "Players"
+        ],
+        "summary": "Which teams a player fits",
+        "description": "For a rated player on a current non-entry-level contract: every other team ranked strong / possible / long shot on need (team needs), window (a rental needs a likely playoff team) and cap space. A fit, not a prediction of a trade. Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial use only, credit EyeWall Analytics and MoneyPuck.com.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "8478427"
+            },
+            "required": true,
+            "name": "playerId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trade fit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeFitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/games/{gameId}/recap": {
+      "get": {
+        "operationId": "getNhlGameRecap",
+        "tags": [
+          "EyeWall AI"
+        ],
+        "summary": "Game recap for one side (NHL)",
+        "description": "Written by EyeWall AI from EyeWall's data; every number in it comes from that data. Written the night of the game for each team. Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial use only, credit EyeWall Analytics and MoneyPuck.com.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "2026020321"
+            },
+            "required": true,
+            "name": "gameId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z]{3}$",
+              "description": "Team code of the side to read the recap for.",
+              "example": "CAR"
+            },
+            "required": true,
+            "description": "Team code of the side to read the recap for.",
+            "name": "team",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/Locale"
+            },
+            "required": false,
+            "description": "Language of EyeWall AI text.",
+            "name": "locale",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recap",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameRecapResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/games/{gameId}/preview": {
+      "get": {
+        "operationId": "getNhlGamePreview",
+        "tags": [
+          "EyeWall AI"
+        ],
+        "summary": "Game preview (NHL)",
+        "description": "Written by EyeWall AI from EyeWall's data; every number in it comes from that data. Written before the game. Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial use only, credit EyeWall Analytics and MoneyPuck.com.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "2026020333"
+            },
+            "required": true,
+            "name": "gameId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/Locale"
+            },
+            "required": false,
+            "description": "Language of EyeWall AI text.",
+            "name": "locale",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GamePreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/players/{playerId}/scouting": {
+      "get": {
+        "operationId": "getNhlScouting",
+        "tags": [
+          "EyeWall AI"
+        ],
+        "summary": "Scouting report (NHL)",
+        "description": "Written by EyeWall AI from EyeWall's data; every number in it comes from that data. Built on MoneyPuck inputs: CC BY-NC 4.0, non-commercial use only, credit EyeWall Analytics and MoneyPuck.com.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "8478427"
+            },
+            "required": true,
+            "name": "playerId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{8}$",
+              "description": "NHL season id. Defaults to the current season."
+            },
+            "required": false,
+            "description": "NHL season id. Defaults to the current season.",
+            "name": "season",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/Locale"
+            },
+            "required": false,
+            "description": "Language of EyeWall AI text.",
+            "name": "locale",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scouting report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoutingResponse"
                 }
               }
             }
