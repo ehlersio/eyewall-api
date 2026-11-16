@@ -2,7 +2,7 @@
 
 import { z } from '@hono/zod-openapi';
 
-export const API_VERSION = '1.0.0';
+export const API_VERSION = '1.1.0';
 export const DOCS_URL = 'https://api.eyewallanalytics.com/docs';
 
 export const LICENSE_CC_BY = 'CC-BY-4.0';
@@ -10,6 +10,17 @@ export const ATTRIBUTION = 'EyeWall Analytics (eyewallanalytics.com)';
 
 export const LEAGUES = ['nhl', 'pwhl', 'ahl', 'echl'];
 export const HOCKEYTECH_LEAGUES = ['pwhl', 'ahl', 'echl'];
+
+export const HockeyTechLeague = z.enum(HOCKEYTECH_LEAGUES).openapi('HockeyTechLeague', {
+  description: 'PWHL, AHL or ECHL (HockeyTech ids).',
+  example: 'ahl',
+});
+
+export const Locale = z.enum(['en', 'fr']).openapi('Locale', { description: 'Language of EyeWall AI text.', example: 'en' });
+
+// A HockeyTech, NHL or game id in a path.
+export const NumericId = (name, example) => z.string().regex(/^\d{1,15}$/)
+  .openapi({ param: { name, in: 'path' }, example });
 
 export const League = z.enum(LEAGUES).openapi('League', {
   description: 'League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.',
@@ -57,12 +68,12 @@ export const TeamRef = z.object({
 
 export const IsoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).openapi({ example: '2026-11-16' });
 
-export function meta(league, source, generatedAt = null) {
+export function meta(league, source, generatedAt = null, { license = LICENSE_CC_BY, attribution = ATTRIBUTION } = {}) {
   return {
     league,
     source,
-    license: LICENSE_CC_BY,
-    attribution: ATTRIBUTION,
+    license,
+    attribution,
     generatedAt,
     docs: DOCS_URL,
   };

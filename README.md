@@ -1,6 +1,6 @@
 # EyeWall API
 
-A public, versioned API for the hockey models built by [EyeWall Analytics](https://eyewallanalytics.com): Elo ratings, pre-game win probabilities, playoff odds and a scorecard of how the models have done, for the **NHL, PWHL, AHL and ECHL**.
+A public, versioned API for the hockey models built by [EyeWall Analytics](https://eyewallanalytics.com): Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a scorecard of how the models have done, for the **NHL, PWHL, AHL and ECHL**.
 
 - **Base URL:** `https://api.eyewallanalytics.com`
 - **Docs:** [api.eyewallanalytics.com/docs](https://api.eyewallanalytics.com/docs)
@@ -24,6 +24,12 @@ curl https://api.eyewallanalytics.com/v1/nhl/playoff-odds
 | `GET /v1/{league}/games/{gameId}/win-probability` | One game's pre-game win probability |
 | `GET /v1/{league}/playoff-odds[?season=]` | Every team's playoff and division probability and projected points, from the nightly simulation |
 | `GET /v1/nhl/scorecard` | Live and backtest grades for the game-winner, starting-goalie and playoff-odds models |
+| `GET /v1/{pwhl,ahl,echl}/power-rankings[?season=]` | Nightly power rankings: rank, previous rank, score and component ranks |
+| `GET /v1/{pwhl,ahl,echl}/teams/{teamId}/power-ranking[?locale=en\|fr]` | One team's ranking, its recent history, and EyeWall AI's paragraph in English or French |
+| `GET /v1/{pwhl,ahl,echl}/players/{playerId}/percentiles[?season=]` | Skater percentiles plus EyeWall xG and goals above expected |
+| `GET /v1/{pwhl,ahl,echl}/goalies/{playerId}/percentiles[?season=]` | Goalie percentiles, goals saved above expected, save percentage by danger zone |
+| `GET /v1/nhl/teams/{team}/projected-lines` | Projected forward lines and defense pairs for the team's next game |
+| `GET /v1/nhl/games/{gameId}/goalie-starts` | Each goalie's probability of starting the game |
 
 `{league}` is `nhl`, `pwhl`, `ahl` or `echl`. NHL ids are the NHL's; PWHL, AHL and ECHL ids are HockeyTech's.
 
@@ -40,7 +46,7 @@ Box scores, play-by-play, shot locations, rosters, standings and schedules belon
 - **Data:** [CC BY 4.0](LICENSE-DATA). Credit **"EyeWall Analytics (eyewallanalytics.com)"** wherever the data appears. Each response's `meta.license` and `meta.attribution` say exactly what applies to it.
 - **Code:** [MIT](LICENSE).
 
-Later routes that use MoneyPuck inputs (WAR and the models built on it) will be CC BY-NC 4.0 with a MoneyPuck credit, and will say so in `meta`.
+Later routes that use MoneyPuck inputs (WAR and the models built on it, including NHL power rankings and EyeWall AI's NHL text) will be CC BY-NC 4.0 with a MoneyPuck credit, and will say so in `meta`. Injury statuses (ESPN) are never included.
 
 ## Stability
 
@@ -50,7 +56,7 @@ Later routes that use MoneyPuck inputs (WAR and the models built on it) will be 
 
 A Cloudflare Worker ([Hono](https://hono.dev) + [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi)). Each route declares its parameters and response with Zod schemas, and the OpenAPI document is generated from them, so the spec can't drift from the code.
 
-The data comes from [eyewall-poller](https://github.com/ehlersio/eyewall-poller), EyeWall's app backend, over a Cloudflare Service Binding. The poller keeps every model and table read; this Worker validates, reshapes into the `/v1` schemas, documents and caches (edge cache plus `Cache-Control`). Poller routes it uses: `/config/teams`, `/config/seasons*`, `/elo/ratings`, `/win-probs`, `/playoff-odds/league`, `/scorecard`.
+The data comes from [eyewall-poller](https://github.com/ehlersio/eyewall-poller), EyeWall's app backend, over a Cloudflare Service Binding. The poller keeps every model and table read; this Worker validates, reshapes into the `/v1` schemas, documents and caches (edge cache plus `Cache-Control`). Poller routes it uses: `/config/teams`, `/config/seasons*`, `/elo/ratings`, `/win-probs`, `/playoff-odds/league`, `/scorecard`, `/{league}/power-rankings`, `/{league}/{player,goalie}/percentiles`, `/projected-lines`, `/probable-starters`.
 
 ```
 src/
@@ -60,7 +66,7 @@ src/
 ├── poller.js         # Service Binding client
 ├── teams.js          # Team lookup (NHL by code, HockeyTech by id)
 ├── respond.js        # { data, meta } and problem responses
-└── routes/           # reference, elo, games, playoffOdds, scorecard
+└── routes/           # reference, elo, games, playoffOdds, scorecard, powerRankings, percentiles, lineups
 scripts/write-openapi.js  # Writes openapi.json (npm run spec)
 test/                     # Route tests against fixture poller responses
 ```

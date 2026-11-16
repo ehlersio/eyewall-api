@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "EyeWall API",
-    "version": "1.0.0",
-    "description": "Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds and a public scorecard of how the models have done.\n\n**What's here.** Only numbers EyeWall produces. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.\n\n**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit \"EyeWall Analytics (eyewallanalytics.com)\" wherever it appears. Each response's `meta.license` and `meta.attribution` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).\n\n**Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.\n\n**Stability.** `/v1` only changes by adding things. A breaking change gets a `/v2`, and `/v1` keeps working for at least a full season after.\n\nProbabilities are model estimates, not betting odds.",
+    "version": "1.1.0",
+    "description": "Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done.\n\n**What's here.** Only numbers EyeWall produces. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.\n\n**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit \"EyeWall Analytics (eyewallanalytics.com)\" wherever it appears. Each response's `meta.license` and `meta.attribution` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).\n\n**Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.\n\n**Stability.** `/v1` only changes by adding things. A breaking change gets a `/v2`, and `/v1` keeps working for at least a full season after.\n\nProbabilities are model estimates, not betting odds.",
     "license": {
       "name": "MIT (code); data CC BY 4.0",
       "identifier": "MIT"
@@ -35,6 +35,18 @@
     {
       "name": "Playoff odds",
       "description": "Season simulations."
+    },
+    {
+      "name": "Rankings",
+      "description": "Power rankings, with EyeWall AI's paragraph per team."
+    },
+    {
+      "name": "Players",
+      "description": "Per-player percentiles and shot-quality numbers."
+    },
+    {
+      "name": "Lineups",
+      "description": "Projected lines and starting goalies."
     },
     {
       "name": "Model grades",
@@ -913,6 +925,712 @@
           "note",
           "updatedAt"
         ]
+      },
+      "PowerRankingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PowerRankings"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "PowerRankings": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The season asked for; null when none was given (the latest run)."
+          },
+          "runDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16"
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PowerRankingRow"
+            },
+            "description": "Best first. Empty before the season's first run."
+          }
+        },
+        "required": [
+          "season",
+          "runDate",
+          "teams"
+        ]
+      },
+      "PowerRankingRow": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer"
+          },
+          "previousRank": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Rank in the previous run; null on a team's first run."
+          },
+          "team": {
+            "$ref": "#/components/schemas/TeamRef"
+          },
+          "score": {
+            "type": "number",
+            "description": "Weighted score, 0 to 1."
+          },
+          "componentRanks": {
+            "$ref": "#/components/schemas/PowerRankingComponentRanks"
+          }
+        },
+        "required": [
+          "rank",
+          "previousRank",
+          "team",
+          "score",
+          "componentRanks"
+        ]
+      },
+      "PowerRankingComponentRanks": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "integer"
+        },
+        "description": "League rank (1 = best) in each part of the score: pts_pct (points percentage), l10_pts_pct (last 10 games), gd_pg (goal difference per game), special_teams.",
+        "example": {
+          "pts_pct": 1,
+          "l10_pts_pct": 1,
+          "gd_pg": 2,
+          "special_teams": 2
+        }
+      },
+      "HockeyTechLeague": {
+        "type": "string",
+        "enum": [
+          "pwhl",
+          "ahl",
+          "echl"
+        ],
+        "description": "PWHL, AHL or ECHL (HockeyTech ids).",
+        "example": "ahl"
+      },
+      "TeamPowerRankingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TeamPowerRanking"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "TeamPowerRanking": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The season asked for; null when none was given (the latest run)."
+          },
+          "runDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16"
+          },
+          "ranking": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PowerRankingRow"
+              },
+              {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Null before the season's first run."
+              }
+            ]
+          },
+          "narrative": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "EyeWall AI's paragraph on the team's ranking, in the requested language. Null when none was written for this run."
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "runDate": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                  "example": "2026-11-16"
+                },
+                "rank": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "runDate",
+                "rank"
+              ]
+            },
+            "description": "This season's recent runs, oldest first (up to 28)."
+          }
+        },
+        "required": [
+          "season",
+          "runDate",
+          "ranking",
+          "narrative",
+          "history"
+        ]
+      },
+      "Locale": {
+        "type": "string",
+        "enum": [
+          "en",
+          "fr"
+        ],
+        "description": "Language of EyeWall AI text.",
+        "example": "en"
+      },
+      "SkaterPercentilesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SkaterPercentiles"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "SkaterPercentiles": {
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "integer"
+          },
+          "team": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "code": {
+                "type": "string"
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "code",
+              "name"
+            ]
+          },
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "seasonType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rateBasis": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "What the rates are per, e.g. \"perGP\" (per game played) where the league publishes no ice time."
+          },
+          "expectedGoals": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "EyeWall xG from shot locations."
+          },
+          "goalsAboveExpected": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "percentiles": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Percentile"
+            },
+            "description": "Keyed by stat: goals, a1 (primary assists), penalties, finishing."
+          }
+        },
+        "required": [
+          "playerId",
+          "team",
+          "season",
+          "seasonType",
+          "rateBasis",
+          "expectedGoals",
+          "goalsAboveExpected",
+          "percentiles"
+        ]
+      },
+      "Percentile": {
+        "type": "object",
+        "properties": {
+          "percentile": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100,
+            "description": "0-100 rank against the league pool. Null when the player is below the sample floor or the stat has no data."
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "percentile",
+          "label",
+          "description"
+        ]
+      },
+      "GoaliePercentilesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GoaliePercentiles"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "GoaliePercentiles": {
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "integer"
+          },
+          "team": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "code": {
+                "type": "string"
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "code",
+              "name"
+            ]
+          },
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "seasonType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rateBasis": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "What the rates are per, e.g. \"perGP\" (per game played) where the league publishes no ice time."
+          },
+          "goalsSavedAboveExpected": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "From EyeWall's danger-zone xG on the shots faced."
+          },
+          "goalsSavedAboveExpectedPerGame": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "savePercentage": {
+            "type": "object",
+            "properties": {
+              "evenStrength": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "highDanger": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "mediumDanger": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "penaltyKill": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "evenStrength",
+              "highDanger",
+              "mediumDanger",
+              "penaltyKill"
+            ],
+            "description": "Save percentage by situation and danger zone, 0-100."
+          },
+          "percentiles": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Percentile"
+            },
+            "description": "Keyed by stat: gsax, gsax60, evSv, hdSv, mdSv, pkSv."
+          }
+        },
+        "required": [
+          "playerId",
+          "team",
+          "season",
+          "seasonType",
+          "rateBasis",
+          "goalsSavedAboveExpected",
+          "goalsSavedAboveExpectedPerGame",
+          "savePercentage",
+          "percentiles"
+        ]
+      },
+      "ProjectedLinesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ProjectedLines"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "ProjectedLines": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamRef"
+          },
+          "basis": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "last_game",
+              "preseason",
+              null
+            ],
+            "description": "\"last_game\": the last game's pairings, adjusted for who is out. \"preseason\": pooled preseason pairings before a team's first game. Null when there is no projection yet."
+          },
+          "basisGameId": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "generatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "forwardLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LineUnit"
+            },
+            "description": "Left wing, center, right wing; top line first."
+          },
+          "defensePairs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LineUnit"
+            }
+          }
+        },
+        "required": [
+          "team",
+          "basis",
+          "basisGameId",
+          "generatedAt",
+          "forwardLines",
+          "defensePairs"
+        ]
+      },
+      "LineUnit": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinePlayer"
+            }
+          }
+        },
+        "required": [
+          "rank",
+          "players"
+        ]
+      },
+      "LinePlayer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "NHL player id."
+          },
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "C"
+          },
+          "filledIn": {
+            "type": "boolean",
+            "description": "True for a player who wasn't in the lineup the projection is based on (replacing an injured or moved player): the least certain part."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "position",
+          "filledIn"
+        ]
+      },
+      "GoalieStartsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GoalieStarts"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "GoalieStarts": {
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer"
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16"
+          },
+          "loggedOn": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16"
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "team": {
+                  "$ref": "#/components/schemas/TeamRef"
+                },
+                "goalies": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GoalieStart"
+                  }
+                }
+              },
+              "required": [
+                "team",
+                "goalies"
+              ]
+            },
+            "description": "Each team's goalies, most likely starter first."
+          }
+        },
+        "required": [
+          "gameId",
+          "date",
+          "loggedOn",
+          "teams"
+        ]
+      },
+      "GoalieStart": {
+        "type": "object",
+        "properties": {
+          "goalie": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          },
+          "startProbability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "factors": {
+            "type": "object",
+            "properties": {
+              "daysRest": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "backToBack": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "startedLastGame": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "shareOfLast10Starts": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "noRecentStarts": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "daysRest",
+              "backToBack",
+              "startedLastGame",
+              "shareOfLast10Starts",
+              "noRecentStarts"
+            ],
+            "description": "The inputs the model weighed."
+          }
+        },
+        "required": [
+          "goalie",
+          "startProbability",
+          "factors"
+        ]
       }
     },
     "parameters": {}
@@ -1495,6 +2213,588 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ScorecardResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/power-rankings": {
+      "get": {
+        "operationId": "getPowerRankings",
+        "tags": [
+          "Rankings"
+        ],
+        "summary": "Power rankings (PWHL, AHL, ECHL)",
+        "description": "EyeWall's nightly power rankings: points percentage, the last 10 games, goal difference per game and special teams, weighted into one score. NHL rankings use MoneyPuck inputs and are not in this release.",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/HockeyTechLeague"
+            },
+            "required": true,
+            "description": "PWHL, AHL or ECHL (HockeyTech ids).",
+            "name": "league",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,8}$",
+              "description": "Season id (see /seasons). Defaults to the latest run."
+            },
+            "required": false,
+            "description": "Season id (see /seasons). Defaults to the latest run.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Power rankings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PowerRankingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/teams/{teamId}/power-ranking": {
+      "get": {
+        "operationId": "getTeamPowerRanking",
+        "tags": [
+          "Rankings"
+        ],
+        "summary": "One team's power ranking, with EyeWall AI's paragraph (PWHL, AHL, ECHL)",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/HockeyTechLeague"
+            },
+            "required": true,
+            "description": "PWHL, AHL or ECHL (HockeyTech ids).",
+            "name": "league",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "328"
+            },
+            "required": true,
+            "name": "teamId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,8}$",
+              "description": "Season id (see /seasons). Defaults to the latest run."
+            },
+            "required": false,
+            "description": "Season id (see /seasons). Defaults to the latest run.",
+            "name": "season",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/Locale"
+            },
+            "required": false,
+            "description": "Language of EyeWall AI text.",
+            "name": "locale",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Team power ranking",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamPowerRankingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/players/{playerId}/percentiles": {
+      "get": {
+        "operationId": "getSkaterPercentiles",
+        "tags": [
+          "Players"
+        ],
+        "summary": "Skater percentiles (PWHL, AHL, ECHL)",
+        "description": "Percentile ranks against the league's qualified pool for the season. Player ids are HockeyTech ids.",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/HockeyTechLeague"
+            },
+            "required": true,
+            "description": "PWHL, AHL or ECHL (HockeyTech ids).",
+            "name": "league",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "10978"
+            },
+            "required": true,
+            "name": "playerId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,8}$",
+              "description": "Season id (see /seasons). Defaults to the latest regular season."
+            },
+            "required": false,
+            "description": "Season id (see /seasons). Defaults to the latest regular season.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Percentiles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkaterPercentilesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/goalies/{playerId}/percentiles": {
+      "get": {
+        "operationId": "getGoaliePercentiles",
+        "tags": [
+          "Players"
+        ],
+        "summary": "Goalie percentiles (PWHL, AHL, ECHL)",
+        "description": "Percentile ranks against the league's qualified pool for the season. Player ids are HockeyTech ids.",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/HockeyTechLeague"
+            },
+            "required": true,
+            "description": "PWHL, AHL or ECHL (HockeyTech ids).",
+            "name": "league",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "10978"
+            },
+            "required": true,
+            "name": "playerId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,8}$",
+              "description": "Season id (see /seasons). Defaults to the latest regular season."
+            },
+            "required": false,
+            "description": "Season id (see /seasons). Defaults to the latest regular season.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Percentiles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoaliePercentilesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/teams/{team}/projected-lines": {
+      "get": {
+        "operationId": "getProjectedLines",
+        "tags": [
+          "Lineups"
+        ],
+        "summary": "Projected lines for a team's next game (NHL)",
+        "description": "EyeWall's nightly projection of each team's forward lines and defense pairs for its next game.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z]{3}$",
+              "example": "CAR"
+            },
+            "required": true,
+            "name": "team",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Projected lines",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectedLinesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nhl/games/{gameId}/goalie-starts": {
+      "get": {
+        "operationId": "getGoalieStarts",
+        "tags": [
+          "Lineups"
+        ],
+        "summary": "Starting goalie probabilities for a game (NHL)",
+        "description": "Each goalie's chance of starting, logged the morning of the game (and the day before). Graded on /v1/nhl/scorecard as startingGoalie.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "2026020333"
+            },
+            "required": true,
+            "name": "gameId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Goalie starts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalieStartsResponse"
                 }
               }
             }
