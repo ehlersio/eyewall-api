@@ -280,6 +280,29 @@ describe('cross-cutting', () => {
     expect(body.title).toBe('Not Found');
   });
 
+  it('/llms.txt lists every route from the spec', async () => {
+    const { status, body, res } = await get('/llms.txt', makeEnv());
+    expect(status).toBe(200);
+    expect(res.headers.get('Content-Type')).toContain('text/plain');
+    expect(body).toContain('# EyeWall API');
+    expect(body).toContain('- GET /v1/{league}/playoff-odds: Playoff probabilities for every team');
+    expect(body).toContain('- GET /v1/nhl/war: WAR for every NHL player');
+  });
+
+  // ChatGPT GPT Actions reject an operation description over 300
+  // characters, and need an operationId on every operation.
+  it('every operation fits GPT Action limits', async () => {
+    const { body } = await get('/openapi.json', makeEnv());
+    const ops = Object.values(body.paths).flatMap(p => Object.values(p));
+    expect(ops.length).toBeGreaterThan(20);
+    for (const op of ops) {
+      expect(op.operationId).toMatch(/^[A-Za-z]+$/);
+      expect((op.description ?? '').length, op.operationId).toBeLessThanOrEqual(300);
+      expect((op.summary ?? '').length, op.operationId).toBeLessThanOrEqual(300);
+    }
+    expect(body.servers).toEqual([{ url: 'https://api.eyewallanalytics.com' }]);
+  });
+
   it('serves the OpenAPI document and the docs page', async () => {
     const spec = await get('/openapi.json', makeEnv());
     expect(spec.status).toBe(200);

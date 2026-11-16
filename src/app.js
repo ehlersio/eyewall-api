@@ -123,6 +123,33 @@ export function createApp() {
     attribution: ATTRIBUTION,
   }, 200, { 'Cache-Control': 'public, max-age=3600' }));
 
+  // A plain-text index for AI agents and crawlers (llmstxt.org), built
+  // from the same OpenAPI document so it lists every route.
+  app.get('/llms.txt', c => {
+    const doc = app.getOpenAPI31Document(OPENAPI_CONFIG);
+    const lines = Object.entries(doc.paths).flatMap(([path, ops]) =>
+      Object.values(ops).map(op => `- GET ${path}: ${op.summary}`));
+    const text = [
+      '# EyeWall API',
+      '',
+      `> ${OPENAPI_CONFIG.info.description.split('\n')[0]}`,
+      '',
+      'No key needed; 60 requests a minute per IP. Every success is { data, meta }; meta.license and meta.attribution say how to credit it. NHL models built on MoneyPuck inputs are CC BY-NC 4.0 (non-commercial).',
+      '',
+      '## Docs',
+      '',
+      '- [OpenAPI 3.1 spec](https://api.eyewallanalytics.com/openapi.json): parameters and response schemas for every route',
+      `- [Interactive docs](${DOCS_URL})`,
+      '- [Bulk files](https://github.com/ehlersio/eyewall-api/releases/tag/data): nightly JSON and CSV of every league-wide table',
+      '',
+      '## Routes',
+      '',
+      ...lines,
+      '',
+    ].join('\n');
+    return c.text(text, 200, { 'Cache-Control': 'public, max-age=3600' });
+  });
+
   app.notFound(c => problem(c, 404, 'Not Found', 'see /docs for the routes'));
   app.onError((err, c) => {
     if (err instanceof UpstreamError) {
