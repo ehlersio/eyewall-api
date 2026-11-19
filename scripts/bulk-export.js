@@ -24,6 +24,8 @@ export const DATASETS = [
     [`${l}-teams`, `/v1/${l}/teams`, d => d],
     [`${l}-elo`, `/v1/${l}/elo`, d => d.ratings],
     [`${l}-playoff-odds`, `/v1/${l}/playoff-odds`, d => d.teams],
+    // the latest season with scored games: one row per game
+    [`${l}-game-xg`, `/v1/${l}/xg?season=latest`, d => d.games],
   ]),
   ...HT.map(l => [`${l}-power-rankings`, `/v1/${l}/power-rankings`, d => d.teams]),
   ['nhl-power-rankings', '/v1/nhl/power-rankings', d => d.teams],

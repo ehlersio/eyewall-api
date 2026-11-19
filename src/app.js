@@ -11,6 +11,7 @@ import { problem } from './respond.js';
 import { registerReference } from './routes/reference.js';
 import { registerElo } from './routes/elo.js';
 import { registerGames } from './routes/games.js';
+import { registerGameXg } from './routes/gameXg.js';
 import { registerPlayoffOdds } from './routes/playoffOdds.js';
 import { registerScorecard } from './routes/scorecard.js';
 import { registerPowerRankings } from './routes/powerRankings.js';
@@ -20,7 +21,7 @@ import { registerNhlModels } from './routes/nhlModels.js';
 import { registerNhlText } from './routes/nhlText.js';
 import { CONTRACTS_TAG_DESCRIPTION, registerContracts } from './routes/contracts.js';
 
-const DESCRIPTION = `Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done; and NHL contracts from EyeWall's open [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset.
+const DESCRIPTION = `Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, expected goals per game, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done; and NHL contracts from EyeWall's open [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset.
 
 **What's here.** Only numbers EyeWall produces, and the contracts dataset EyeWall collects. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.
 
@@ -47,7 +48,7 @@ export const OPENAPI_CONFIG = {
   tags: [
     { name: 'Reference', description: 'Leagues, seasons and teams, for joining to other data.' },
     { name: 'Ratings', description: 'Team strength models.' },
-    { name: 'Games', description: 'Per-game predictions.' },
+    { name: 'Games', description: 'Per-game predictions and expected goals.' },
     { name: 'Playoff odds', description: 'Season simulations.' },
     { name: 'Rankings', description: 'Power rankings, with EyeWall AI\'s paragraph per team.' },
     { name: 'Players', description: 'Per-player percentiles and shot-quality numbers.' },
@@ -126,6 +127,7 @@ export function createApp() {
   registerReference(app);
   registerElo(app);
   registerGames(app);
+  registerGameXg(app);
   registerPlayoffOdds(app);
   registerScorecard(app);
   // NHL routes before the {league} ones: /v1/nhl/power-rankings must not

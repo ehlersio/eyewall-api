@@ -23,6 +23,8 @@ curl https://api.eyewallanalytics.com/v1/nhl/playoff-odds
 | `GET /v1/{league}/elo` | Elo ratings, home advantage and the win-probability formula |
 | `GET /v1/{league}/games?date=YYYY-MM-DD` | Pre-game win probabilities for a day's games (default: today, America/New_York) |
 | `GET /v1/{league}/games/{gameId}/win-probability` | One game's pre-game win probability |
+| `GET /v1/{league}/xg?date=YYYY-MM-DD` / `?season=N\|latest` | Expected goals per team for a day's or a season's games, from EyeWall's own shot models (default: yesterday, America/New_York) |
+| `GET /v1/{league}/games/{gameId}/xg` | One game's expected goals (NHL: all situations and 5-on-5) |
 | `GET /v1/{league}/playoff-odds[?season=]` | Every team's playoff and division probability and projected points, from the nightly simulation |
 | `GET /v1/nhl/scorecard` | Live and backtest grades for the game-winner, starting-goalie and playoff-odds models |
 | `GET /v1/{pwhl,ahl,echl}/power-rankings[?season=]` | Nightly power rankings: rank, previous rank, score and component ranks |
@@ -56,7 +58,7 @@ Probabilities are model estimates, not betting odds.
 
 ## Bulk files
 
-Every league-wide table (teams, Elo, playoff odds, power rankings, NHL RAPM and WAR, NHL contracts and team cap totals) is exported nightly as JSON and CSV to the [`data` release](https://github.com/ehlersio/eyewall-api/releases/tag/data). Files are replaced in place, so a link such as `releases/download/data/nhl-elo.csv` always points to the latest export. `manifest.json` lists each file's licence, attribution and when the data was produced. Use these files for whole tables instead of calling the API in a loop. The export is `scripts/bulk-export.js`, run by `.github/workflows/bulk.yml`.
+Every league-wide table (teams, Elo, playoff odds, power rankings, expected goals per game for the latest season, NHL RAPM and WAR, NHL contracts and team cap totals) is exported nightly as JSON and CSV to the [`data` release](https://github.com/ehlersio/eyewall-api/releases/tag/data). Files are replaced in place, so a link such as `releases/download/data/nhl-elo.csv` always points to the latest export. `manifest.json` lists each file's licence, attribution and when the data was produced. Use these files for whole tables instead of calling the API in a loop. The export is `scripts/bulk-export.js`, run by `.github/workflows/bulk.yml`.
 
 ## What's not here
 

@@ -3,6 +3,15 @@
 `/v1` changes are additive only. Breaking changes go to a new version.
 
 
+## 1.4.0 — 2026-11-19
+
+Added (all four leagues, CC BY 4.0): expected goals per team per game from EyeWall's own shot models. Never MoneyPuck's game xG.
+
+- `GET /v1/{league}/xg?date=YYYY-MM-DD` or `?season=N|latest` (default: yesterday, America/New_York)
+- `GET /v1/{league}/games/{gameId}/xg`
+- NHL: a logistic model of unblocked attempts (distance, angle, shot type, strength, rebounds), all situations and 5-on-5. PWHL/AHL/ECHL: three distance bands at the season's own goal rates, over goals and shots on goal. Each game's `model` says which.
+- Bulk files: `{league}-game-xg` (the latest season with scored games).
+
 ## 1.3.1 — 2026-11-16
 
 - Edge-cached responses keep their route's `Cache-Control` (contracts and the rest: 1 hour or less). Before, a cache hit carried the zone's 4-hour browser TTL.
