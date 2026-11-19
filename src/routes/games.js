@@ -6,7 +6,7 @@ import { poller } from '../poller.js';
 import { problem, send } from '../respond.js';
 import { teamIndex } from '../teams.js';
 
-const GameTeam = z.object({
+export const GameTeam = z.object({
   id: z.number().int().nullable(),
   code: z.string().nullable(),
   name: z.string().nullable(),
@@ -40,7 +40,7 @@ export function todayET(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
 }
 
-function gameTeam(index, key, code) {
+export function gameTeam(index, key, code) {
   const t = index.find(key);
   if (t) return { id: t.id, code: t.code, name: t.name ?? null };
   return { id: code ? null : Number(key) || null, code: code ?? null, name: null };

@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "EyeWall API",
-    "version": "1.3.1",
-    "description": "Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done; and NHL contracts from EyeWall's open [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset.\n\n**What's here.** Only numbers EyeWall produces, and the contracts dataset EyeWall collects. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.\n\n**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit \"EyeWall Analytics (eyewallanalytics.com)\" wherever it appears. The exception is NHL models built on [MoneyPuck](https://moneypuck.com) inputs (WAR, NHL power rankings, team needs, trade fit, and EyeWall AI's NHL text): those are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), non-commercial only, crediting MoneyPuck.com as well. NHL contracts are [CC0](https://creativecommons.org/publicdomain/zero/1.0/) (no credit required), like the dataset they come from. Each response's `meta.license` and `meta.attribution` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).\n\n**Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.\n\n**Stability.** `/v1` only changes by adding things. A breaking change gets a `/v2`, and `/v1` keeps working for at least a full season after.\n\nProbabilities are model estimates, not betting odds.",
+    "version": "1.4.0",
+    "description": "Hockey models built by [EyeWall Analytics](https://eyewallanalytics.com) for the NHL, PWHL, AHL and ECHL: Elo ratings, pre-game win probabilities, expected goals per game, playoff odds, power rankings, player percentiles, projected lines, starting-goalie probabilities and a public scorecard of how the models have done; and NHL contracts from EyeWall's open [nhl-contracts](https://github.com/ehlersio/nhl-contracts) dataset.\n\n**What's here.** Only numbers EyeWall produces, and the contracts dataset EyeWall collects. Box scores, play-by-play, rosters, standings and schedules belong to the leagues and aren't served here; responses carry league ids and team codes so you can join to those feeds yourself.\n\n**Licence.** Data is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): credit \"EyeWall Analytics (eyewallanalytics.com)\" wherever it appears. The exception is NHL models built on [MoneyPuck](https://moneypuck.com) inputs (WAR, NHL power rankings, team needs, trade fit, and EyeWall AI's NHL text): those are [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), non-commercial only, crediting MoneyPuck.com as well. NHL contracts are [CC0](https://creativecommons.org/publicdomain/zero/1.0/) (no credit required), like the dataset they come from. Each response's `meta.license` and `meta.attribution` say exactly what applies. Code is MIT ([github.com/ehlersio/eyewall-api](https://github.com/ehlersio/eyewall-api)).\n\n**Limits.** 60 requests a minute per IP, no key needed. Responses are cached; most data changes once a night.\n\n**Stability.** `/v1` only changes by adding things. A breaking change gets a `/v2`, and `/v1` keeps working for at least a full season after.\n\nProbabilities are model estimates, not betting odds.",
     "license": {
       "name": "MIT (code); data CC BY 4.0, CC BY-NC 4.0 or CC0 per route",
       "identifier": "MIT"
@@ -30,7 +30,7 @@
     },
     {
       "name": "Games",
-      "description": "Per-game predictions."
+      "description": "Per-game predictions and expected goals."
     },
     {
       "name": "Playoff odds",
@@ -564,6 +564,184 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/GameWinProbability"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "GameXgListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GameXgList"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "GameXgList": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16",
+            "description": "The date asked for; null for a season."
+          },
+          "season": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameXg"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "season",
+          "games"
+        ]
+      },
+      "GameXg": {
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "example": 2026020345
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-16"
+          },
+          "season": {
+            "type": "integer",
+            "description": "NHL season (20262027) or HockeyTech season id.",
+            "example": 20262027
+          },
+          "gameType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "preseason",
+              "regular",
+              "playoffs",
+              null
+            ],
+            "description": "NHL only; null for PWHL/AHL/ECHL (see seasonType)."
+          },
+          "seasonType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "PWHL/AHL/ECHL only (regular, playoffs, ...); null for the NHL."
+          },
+          "model": {
+            "type": "string",
+            "description": "logistic-<fit date> (NHL): a logistic model of unblocked attempts by distance, angle, shot type, strength and rebounds. distance-bands-season-fit (PWHL/AHL/ECHL): three distance bands at the season's own goal rates, over goals and shots on goal. Shootouts and penalty shots never count.",
+            "example": "logistic-2026-11-18"
+          },
+          "home": {
+            "$ref": "#/components/schemas/XgSide"
+          },
+          "away": {
+            "$ref": "#/components/schemas/XgSide"
+          }
+        },
+        "required": [
+          "gameId",
+          "date",
+          "season",
+          "gameType",
+          "seasonType",
+          "model",
+          "home",
+          "away"
+        ]
+      },
+      "XgSide": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/GameTeam"
+          },
+          "all": {
+            "$ref": "#/components/schemas/XgLine"
+          },
+          "fiveOnFive": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/XgLine"
+              },
+              {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "NHL only: 5-on-5 with both goalies in. Null for PWHL/AHL/ECHL, whose feeds don't give strength for every attempt."
+              }
+            ]
+          }
+        },
+        "required": [
+          "team",
+          "all",
+          "fiveOnFive"
+        ]
+      },
+      "XgLine": {
+        "type": "object",
+        "properties": {
+          "attempts": {
+            "type": "integer",
+            "description": "Attempts that carry xG (see the model).",
+            "example": 48
+          },
+          "goals": {
+            "type": "integer",
+            "example": 3
+          },
+          "xg": {
+            "type": "number",
+            "description": "Expected goals: the sum of each attempt's chance of scoring.",
+            "example": 4.632
+          }
+        },
+        "required": [
+          "attempts",
+          "goals",
+          "xg"
+        ]
+      },
+      "GameXgResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GameXg"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"
@@ -4209,6 +4387,204 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GameWinProbabilityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/xg": {
+      "get": {
+        "operationId": "listGameXg",
+        "tags": [
+          "Games"
+        ],
+        "summary": "Expected goals for a day's or a season's games",
+        "description": "Each team's expected goals per game from EyeWall's own shot models (see model). Leagues aren't comparable: each feed records different attempts. Pass date or season; with neither, yesterday's games (America/New_York).",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/League"
+            },
+            "required": true,
+            "description": "League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.",
+            "name": "league",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-11-16"
+            },
+            "required": false,
+            "name": "date",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^(\\d{1,8}|latest)$",
+              "description": "NHL season (20252026), HockeyTech season id, or latest. A whole season is large; the bulk files have it too.",
+              "example": "latest"
+            },
+            "required": false,
+            "description": "NHL season (20252026), HockeyTech season id, or latest. A whole season is large; the bulk files have it too.",
+            "name": "season",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Games",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameXgListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (60 requests a minute per IP)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The data source answered with an error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The data source is temporarily unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{league}/games/{gameId}/xg": {
+      "get": {
+        "operationId": "getGameXg",
+        "tags": [
+          "Games"
+        ],
+        "summary": "Expected goals for one game",
+        "description": "Each team's expected goals per game from EyeWall's own shot models (see model). Leagues aren't comparable: each feed records different attempts. A game appears after the nightly run that follows it.",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/League"
+            },
+            "required": true,
+            "description": "League id. NHL ids come from the NHL; PWHL, AHL and ECHL ids are HockeyTech ids.",
+            "name": "league",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,15}$",
+              "example": "2026020345"
+            },
+            "required": true,
+            "name": "gameId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Game",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameXgResponse"
                 }
               }
             }
