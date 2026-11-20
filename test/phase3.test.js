@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { z } from '@hono/zod-openapi';
 import { fixture, get, makeEnv, teamsRoutes } from './helpers.js';
 import { Meta } from '../src/schemas.js';
-import { NhlPowerRankings, NhlTeamPowerRanking, RapmTable, TeamNeeds, TradeFit, WarTable } from '../src/routes/nhlModels.js';
+import { NhlPowerRankings, NhlTeamPowerRanking, RapmTable, shapeRapm, TeamNeeds, TradeFit, WarTable } from '../src/routes/nhlModels.js';
 import { Preview, Recap, Scouting } from '../src/routes/nhlText.js';
 
 const expectEnvelope = (body, schema) => z.object({ data: schema, meta: Meta }).strict().parse(body);
@@ -39,6 +39,18 @@ describe('GET /v1/nhl/war and /v1/nhl/rapm', () => {
     const rows = fixture('player-analytics').rows;
     expect(data.players).toHaveLength(rows.filter(r => r.rapm != null).length);
     expect(data.players[0].rapm).toBeGreaterThanOrEqual(data.players.at(-1).rapm);
+  });
+
+  it('RAPM: offence and defence from rapm_off / rapm_def, null when absent', () => {
+    const index = { find: () => null };
+    const raw = { rows: [
+      { player_id: 1, team: 'EDM', rapm: 0.32, rapm_off: 0.25, rapm_def: -0.07, rapm_toi_min: 3100 },
+      { player_id: 2, team: 'CAR', rapm: 0.1, rapm_toi_min: 2900 },
+    ] };
+    const data = shapeRapm(raw, new Map(), index, 20262027);
+    RapmTable.parse(data);
+    expect(data.players[0]).toMatchObject({ rapm: 0.32, offence: 0.25, defence: -0.07, minutes: 3100 });
+    expect(data.players[1]).toMatchObject({ offence: null, defence: null });
   });
 
   it('400 for a malformed season', async () => {

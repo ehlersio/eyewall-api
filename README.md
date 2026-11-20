@@ -33,7 +33,7 @@ curl https://api.eyewallanalytics.com/v1/nhl/playoff-odds
 | `GET /v1/{pwhl,ahl,echl}/goalies/{playerId}/percentiles[?season=]` | Goalie percentiles, goals saved above expected, save percentage by danger zone |
 | `GET /v1/nhl/teams/{team}/projected-lines` | Projected forward lines and defense pairs for the team's next game |
 | `GET /v1/nhl/games/{gameId}/goalie-starts` | Each goalie's probability of starting the game |
-| `GET /v1/nhl/rapm[?season=]` | RAPM for every NHL skater (three-season, 5-on-5 xG impact) |
+| `GET /v1/nhl/rapm[?season=]` | RAPM for every NHL skater: net, offence and defence (three-season, 5-on-5 stints, xG/60) |
 | `GET /v1/nhl/war[?season=]` ¹ | WAR for every NHL player |
 | `GET /v1/nhl/power-rankings[?season=]` ¹ | NHL power rankings |
 | `GET /v1/nhl/teams/{team}/power-ranking` ¹ | One team's rank, history and EyeWall AI's paragraph |
