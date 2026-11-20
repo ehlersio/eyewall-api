@@ -3,6 +3,11 @@
 `/v1` changes are additive only. Breaking changes go to a new version.
 
 
+## 1.5.0 — 2026-11-20
+
+- `GET /v1/nhl/rapm` adds `offence` and `defence` per player (xG/60 at 5-on-5; defence lower is better), null until a season is computed with the new design.
+- RAPM's method changes: a ridge regression over 5-on-5 stints (stretches with the same ten skaters on) with separate offence and defence, on EyeWall's own xG model, home ice and score state as covariates. Values are now true xG/60 differentials and run about 3x wider than before; `rapm` is offence minus defence. WAR (`/v1/nhl/war`), built on RAPM, moves with it. Backtest: eyewall-pipeline `docs/rapm_design_backtest_results.md`.
+
 ## 1.4.0 — 2026-11-19
 
 Added (all four leagues, CC BY 4.0): expected goals per team per game from EyeWall's own shot models. Never MoneyPuck's game xG.

@@ -48,7 +48,9 @@ export const RapmTable = z.object({
   players: z.array(z.object({
     player: PlayerRef,
     team: TeamRef.nullable(),
-    rapm: z.number().openapi({ description: 'Expected-goal differential per 60 minutes at 5-on-5 above an average player, from a ridge regression over three seasons of shots and shifts.' }),
+    rapm: z.number().openapi({ description: 'Net: expected-goal differential per 60 minutes at 5-on-5 above an average player (offence minus defence).' }),
+    offence: z.number().nullable().openapi({ description: 'xG per 60 the player adds for his team at 5-on-5. Null until computed with the stint design.' }),
+    defence: z.number().nullable().openapi({ description: 'xG per 60 he allows at 5-on-5, relative to average; lower is better. Null until computed with the stint design.' }),
     minutes: z.number().nullable().openapi({ description: '5-on-5 minutes in the three-season sample.' }),
   })).openapi({ description: 'Highest first. Players under 150 minutes in the sample are left out.' }),
 }).openapi('RapmTable');
@@ -66,7 +68,7 @@ export const WarTable = z.object({
 export function shapeRapm(raw, names, index, season) {
   const players = (raw?.rows ?? [])
     .filter(r => num(r.rapm) != null)
-    .map(r => ({ player: playerRef(names, r.player_id), team: index.find(r.team) ? teamRef(index.find(r.team)) : null, rapm: num(r.rapm), minutes: num(r.rapm_toi_min) }))
+    .map(r => ({ player: playerRef(names, r.player_id), team: index.find(r.team) ? teamRef(index.find(r.team)) : null, rapm: num(r.rapm), offence: num(r.rapm_off), defence: num(r.rapm_def), minutes: num(r.rapm_toi_min) }))
     .sort((a, b) => b.rapm - a.rapm);
   return { season: Number(season), players };
 }
@@ -238,7 +240,7 @@ export function registerNhlModels(app) {
   app.openapi(createRoute({
     method: 'get', path: '/v1/nhl/rapm', operationId: 'getNhlRapm', tags: ['Players'],
     summary: 'RAPM for every NHL skater',
-    description: 'Regularized adjusted plus-minus: each skater\'s 5-on-5 expected-goal impact with teammates, opponents and score state accounted for. Three-season rolling sample, recomputed nightly for the current season. Uses EyeWall\'s own shot-location xG (no MoneyPuck input).',
+    description: 'Regularized adjusted plus-minus: each skater\'s 5-on-5 expected-goal impact, offence and defence, with teammates, opponents, home ice and score state accounted for. Three-season rolling sample of 5-on-5 stints, recomputed nightly. Uses EyeWall\'s own xG model (no MoneyPuck input).',
     request: { query: seasonQuery },
     responses: { 200: { description: 'RAPM', content: { 'application/json': { schema: envelope('RapmResponse', RapmTable) } } }, ...problemResponses },
   }), async c => {
